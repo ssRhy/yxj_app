@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ImageBackground } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import RegisterForm from "../../../components/auth/RegisterForm";
@@ -7,14 +7,20 @@ import RegisterForm from "../../../components/auth/RegisterForm";
 const RegisterPage = () => {
   return (
     <View style={styles.container}>
-      <LinearGradient
-        style={styles.gradient}
-        colors={["rgba(90, 82, 97, 0.4)", "rgba(111, 197, 36, 0.8)"]}
+      <ImageBackground
+        source={require("../../../assets/background.png")}
+        style={styles.background}
+        resizeMode="cover"
       >
-        <View style={styles.formContainer}>
-          <RegisterForm />
-        </View>
-      </LinearGradient>
+        <LinearGradient
+          style={styles.gradient}
+          colors={["rgba(90, 82, 97, 0.4)", "rgba(111, 197, 36, 0.8)"]}
+        >
+          <View style={styles.formContainer}>
+            <RegisterForm />
+          </View>
+        </LinearGradient>
+      </ImageBackground>
     </View>
   );
 };
@@ -32,6 +38,9 @@ const styles = StyleSheet.create({
   formContainer: {
     width: "100%",
     maxWidth: 400,
+  },
+  background: {
+    flex: 1,
   },
 });
 

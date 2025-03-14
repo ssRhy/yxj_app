@@ -6,20 +6,21 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useUser } from "../../../context/UserContext";
 
-// 定义健康数据类型
-interface HealthData {
-  bmi: number;
-  bmiStatus: string;
-  healthScore: number;
-  bmr: number;
-  dailyCalories: number;
-}
+// // 定义健康数据类型
+// interface HealthData {
+//   bmi: number;
+//   bmiStatus: string;
+//   healthScore: number;
+//   bmr: number;
+//   dailyCalories: number;
+// }
 
 // 修改用户类型定义
 interface User {
@@ -31,8 +32,8 @@ interface User {
   mbti?: string;
   // 修改属性名以匹配 RegisterForm 中的命名
   chineseBaZi?: string; // 之前是 bazi
-  height?: number;
-  weight?: number;
+  // height?: number;
+  // weight?: number;
 }
 
 // MBTI描述函数
@@ -266,78 +267,81 @@ const styles = StyleSheet.create({
     color: "white",
     lineHeight: 24,
   },
+  background: {
+    flex: 1,
+  },
 });
 
 const DashboardPage: React.FC = () => {
   const { user, logout } = useUser();
   const [isLoading, setIsLoading] = useState(true);
-  const [userData, setUserData] = useState<HealthData>({
-    bmi: 0,
-    bmiStatus: "",
-    healthScore: 0,
-    bmr: 0,
-    dailyCalories: 0,
-  });
+  // const [userData, setUserData] = useState<HealthData>({
+  //   bmi: 0,
+  //   bmiStatus: "",
+  //   healthScore: 0,
+  //   bmr: 0,
+  //   dailyCalories: 0,
+  // });
 
   useEffect(() => {
-    if (user) {
-      calculateHealthData(user);
-    }
+    // if (user) {
+    //   calculateHealthData(user);
+    // }
     setIsLoading(false);
   }, [user]);
 
-  const calculateHealthData = (user: any) => {
-    if (user.height && user.weight) {
-      const height = user.height / 100; // 转换为米
-      const bmi = user.weight / (height * height);
-      const bmiStatus = getBMIStatus(bmi);
-      const healthScore = calculateHealthScore(bmi);
-      const bmr = calculateBMR(user);
-      const dailyCalories = bmr * 1.2; // 假设轻度活动水平
+  // const calculateHealthData = (user: any) => {
+  //   if (user.height && user.weight) {
+  //     const height = user.height / 100; // 转换为米
+  //     const bmi = user.weight / (height * height);
+  //     const bmiStatus = getBMIStatus(bmi);
+  //     const healthScore = calculateHealthScore(bmi);
+  //     const bmr = calculateBMR(user);
+  //     const dailyCalories = bmr * 1.2; // 假设轻度活动水平
 
-      setUserData({
-        bmi,
-        bmiStatus,
-        healthScore,
-        bmr,
-        dailyCalories,
-      });
-    }
-  };
+  //     setUserData({
+  //       bmi,
+  //       bmiStatus,
+  //       healthScore,
+  //       bmr,
+  //       dailyCalories,
+  //     });
+  //   }
+  // };
 
-  const getBMIStatus = (bmi: number): string => {
-    if (bmi < 18.5) return "偏瘦";
-    if (bmi < 24) return "正常";
-    if (bmi < 28) return "偏重";
-    return "肥胖";
-  };
+  // const getBMIStatus = (bmi: number): string => {
+  //   if (bmi < 18.5) return "偏瘦";
+  //   if (bmi < 24) return "正常";
+  //   if (bmi < 28) return "偏重";
+  //   return "肥胖";
+  // };
 
-  const calculateHealthScore = (bmi: number): number => {
-    if (bmi >= 18.5 && bmi < 24) return 100;
-    if (bmi < 18.5) return 100 - (18.5 - bmi) * 10;
-    return 100 - (bmi - 24) * 5;
-  };
+  // const calculateHealthScore = (bmi: number): number => {
+  //   if (bmi >= 18.5 && bmi < 24) return 100;
+  //   if (bmi < 18.5) return 100 - (18.5 - bmi) * 10;
+  //   return 100 - (bmi - 24) * 5;
+  // };
 
-  const calculateBMR = (user: any): number => {
-    if (!user.weight || !user.height) return 0;
-    // 使用Harris-Benedict公式
-    const base = user.gender === "male" ? 88.362 : 447.593;
-    const weightFactor = user.gender === "male" ? 13.397 : 9.247;
-    const heightFactor = user.gender === "male" ? 4.799 : 3.098;
-    const ageFactor = user.gender === "male" ? 5.677 : 4.33;
+  // const calculateBMR = (user: any): number => {
+  //   if (!user.weight || !user.height) return 0;
+  //   // 使用Harris-Benedict公式
+  //   const base = user.gender === "male" ? 88.362 : 447.593;
+  //   const weightFactor = user.gender === "male" ? 13.397 : 9.247;
+  //   const heightFactor = user.gender === "male" ? 4.799 : 3.098;
+  //   const ageFactor = user.gender === "male" ? 5.677 : 4.33;
 
-    // 假设年龄为25岁，如果没有出生日期
-    const age = user.birthDate
-      ? new Date().getFullYear() - new Date(user.birthDate).getFullYear()
-      : 25;
+  //   // 假设年龄为25岁，如果没有出生日期
+  //   const age = user.birthDate
+  //     ? new Date().getFullYear() - new Date(user.birthDate).getFullYear()
+  //     : 25;
 
-    return (
-      base +
-      weightFactor * user.weight +
-      heightFactor * user.height -
-      ageFactor * age
-    );
-  };
+  //   return (
+  //     base +
+  //     weightFactor * user.weight +
+  //     heightFactor * user.height -
+  //     ageFactor * age
+  //   );
+  // };
 
   const handleLogout = async () => {
     try {
@@ -383,138 +387,148 @@ const DashboardPage: React.FC = () => {
     <View style={styles.container}>
       <LinearGradient
         style={styles.gradient}
-        colors={["rgba(90, 82, 97, 0.4)", "rgba(111, 197, 36, 0.8)"]}
+        colors={["rgba(90, 82, 97, 0.4)", "rgba(22, 29, 247, 0.8)"]}
       >
-        <SafeAreaView style={styles.safeArea}>
-          <ScrollView style={styles.scrollView}>
-            <View style={styles.header}>
-              <Text style={styles.welcomeText}>欢迎回来，{user.username}</Text>
-              <TouchableOpacity
-                style={styles.logoutButton}
-                onPress={handleLogout}
-              >
-                <Text style={styles.logoutText}>退出登录</Text>
-              </TouchableOpacity>
-            </View>
+        <ImageBackground
+          source={require("../../../assets/background.png")}
+          style={styles.background}
+          resizeMode="cover"
+        >
+          <SafeAreaView style={styles.safeArea}>
+            <ScrollView style={styles.scrollView}>
+              <View style={styles.header}>
+                <Text style={styles.welcomeText}>
+                  欢迎回来，{user.username}
+                </Text>
+                <TouchableOpacity
+                  style={styles.logoutButton}
+                  onPress={handleLogout}
+                >
+                  <Text style={styles.logoutText}>退出登录</Text>
+                </TouchableOpacity>
+              </View>
 
-            <View style={styles.profileCard}>
-              <View style={styles.profileHeader}>
-                <View style={styles.avatarContainer}>
-                  <Text style={styles.avatarText}>
-                    {user.username.charAt(0).toUpperCase()}
+              <View style={styles.profileCard}>
+                <View style={styles.profileHeader}>
+                  <View style={styles.avatarContainer}>
+                    <Text style={styles.avatarText}>
+                      {user.username.charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={styles.profileInfo}>
+                    <Text style={styles.profileName}>{user.username}</Text>
+                    <Text style={styles.profileEmail}>{user.email}</Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={handleEditProfile}
+                >
+                  <Text style={styles.editButtonText}>编辑资料</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>个人信息</Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>性别:</Text>
+                  <Text style={styles.infoValue}>
+                    {user.gender
+                      ? user.gender === "male"
+                        ? "男"
+                        : user.gender === "female"
+                        ? "女"
+                        : "其他"
+                      : "未设置"}
                   </Text>
                 </View>
-                <View style={styles.profileInfo}>
-                  <Text style={styles.profileName}>{user.username}</Text>
-                  <Text style={styles.profileEmail}>{user.email}</Text>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>出生日期:</Text>
+                  <Text style={styles.infoValue}>
+                    {user.birthDate ? formatDate(user.birthDate) : "未设置"}
+                  </Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>星座:</Text>
+                  <Text style={styles.infoValue}>
+                    {user.zodiacSign || "未设置"}
+                  </Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>MBTI:</Text>
+                  <Text style={styles.infoValue}>{user.mbti || "未设置"}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Text style={styles.infoLabel}>八字:</Text>
+                  <Text style={styles.infoValue}>
+                    {user.chineseBaZi || "未设置"}
+                  </Text>
                 </View>
               </View>
-              <TouchableOpacity
-                style={styles.editButton}
-                onPress={handleEditProfile}
-              >
-                <Text style={styles.editButtonText}>编辑资料</Text>
-              </TouchableOpacity>
-            </View>
 
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>个人信息</Text>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>性别:</Text>
-                <Text style={styles.infoValue}>
-                  {user.gender
-                    ? user.gender === "male"
-                      ? "男"
-                      : user.gender === "female"
-                      ? "女"
-                      : "其他"
-                    : "未设置"}
-                </Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>出生日期:</Text>
-                <Text style={styles.infoValue}>
-                  {user.birthDate ? formatDate(user.birthDate) : "未设置"}
-                </Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>星座:</Text>
-                <Text style={styles.infoValue}>
-                  {user.zodiacSign || "未设置"}
-                </Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>MBTI:</Text>
-                <Text style={styles.infoValue}>{user.mbti || "未设置"}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>八字:</Text>
-                <Text style={styles.infoValue}>
-                  {user.chineseBaZi || "未设置"}
-                </Text>
-              </View>
-            </View>
-
-            {user.mbti && (
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>MBTI 人格分析</Text>
-                <Text style={styles.mbtiDescription}>
-                  {getMBTIDescription(user.mbti)}
-                </Text>
-              </View>
-            )}
-
-            {user.zodiacSign && (
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>星座特质</Text>
-                <Text style={styles.zodiacDescription}>
-                  {getZodiacDescription(user.zodiacSign)}
-                </Text>
-              </View>
-            )}
-
-            {typeof user?.height === "number" &&
-              typeof user?.weight === "number" && (
+              {user.mbti && (
                 <View style={styles.card}>
-                  <Text style={styles.cardTitle}>健康数据</Text>
-                  <View style={styles.dataRow}>
-                    <View style={styles.dataItem}>
-                      <Text style={styles.dataValue}>
-                        {userData.bmi.toFixed(2)}
-                      </Text>
-                      <Text style={styles.dataLabel}>BMI</Text>
-                    </View>
-                    <View style={styles.dataItem}>
-                      <Text style={styles.dataValue}>{userData.bmiStatus}</Text>
-                      <Text style={styles.dataLabel}>状态</Text>
-                    </View>
-                  </View>
-                  <View style={styles.dataRow}>
-                    <View style={styles.dataItem}>
-                      <Text style={styles.dataValue}>
-                        {userData.healthScore}%
-                      </Text>
-                      <Text style={styles.dataLabel}>健康评分</Text>
-                    </View>
-                    <View style={styles.dataItem}>
-                      <Text style={styles.dataValue}>
-                        {userData.bmr.toFixed(2)}
-                      </Text>
-                      <Text style={styles.dataLabel}>基础代谢率</Text>
-                    </View>
-                  </View>
-                  <View style={styles.dataRow}>
-                    <View style={styles.dataItem}>
-                      <Text style={styles.dataValue}>
-                        {userData.dailyCalories.toFixed(2)}
-                      </Text>
-                      <Text style={styles.dataLabel}>每日所需卡路里</Text>
-                    </View>
-                  </View>
+                  <Text style={styles.cardTitle}>MBTI 人格分析</Text>
+                  <Text style={styles.mbtiDescription}>
+                    {getMBTIDescription(user.mbti)}
+                  </Text>
                 </View>
               )}
-          </ScrollView>
-        </SafeAreaView>
+
+              {user.zodiacSign && (
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>星座特质</Text>
+                  <Text style={styles.zodiacDescription}>
+                    {getZodiacDescription(user.zodiacSign)}
+                  </Text>
+                </View>
+              )}
+
+              {/* {typeof user?.height === "number" &&
+                typeof user?.weight === "number" && (
+                  <View style={styles.card}>
+                    <Text style={styles.cardTitle}>健康数据</Text>
+                    <View style={styles.dataRow}>
+                      <View style={styles.dataItem}>
+                        <Text style={styles.dataValue}>
+                          {userData.bmi.toFixed(2)}
+                        </Text>
+                        <Text style={styles.dataLabel}>BMI</Text>
+                      </View>
+                      <View style={styles.dataItem}>
+                        <Text style={styles.dataValue}>
+                          {userData.bmiStatus}
+                        </Text>
+                        <Text style={styles.dataLabel}>状态</Text>
+                      </View>
+                    </View>
+                    <View style={styles.dataRow}>
+                      <View style={styles.dataItem}>
+                        <Text style={styles.dataValue}>
+                          {userData.healthScore}%
+                        </Text>
+                        <Text style={styles.dataLabel}>健康评分</Text>
+                      </View>
+                      <View style={styles.dataItem}>
+                        <Text style={styles.dataValue}>
+                          {userData.bmr.toFixed(2)}
+                        </Text>
+                        <Text style={styles.dataLabel}>基础代谢率</Text>
+                      </View>
+                    </View>
+                    <View style={styles.dataRow}>
+                      <View style={styles.dataItem}>
+                        <Text style={styles.dataValue}>
+                          {userData.dailyCalories.toFixed(2)}
+                        </Text>
+                        <Text style={styles.dataLabel}>每日所需卡路里</Text>
+                      </View>
+                    </View>
+                  </View>
+                )} */}
+            </ScrollView>
+          </SafeAreaView>
+        </ImageBackground>
       </LinearGradient>
     </View>
   );

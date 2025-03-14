@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Platform,
   Modal,
+  ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -264,197 +265,206 @@ const EditProfilePage = () => {
         style={styles.gradient}
         colors={["rgba(90, 82, 97, 0.4)", "rgba(111, 197, 36, 0.8)"]}
       >
-        <SafeAreaView style={styles.safeArea}>
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <Text style={styles.backButtonText}>返回</Text>
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>编辑个人资料</Text>
-            <View style={{ width: 50 }} />
-          </View>
-
-          <ScrollView style={styles.scrollView}>
-            <View style={styles.formContainer}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>用户名</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="请输入用户名"
-                  placeholderTextColor="#aaa"
-                  value={formData.username}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, username: text })
-                  }
-                  editable={!isLoading}
-                />
-                {errors.username ? (
-                  <Text style={styles.errorText}>{errors.username}</Text>
-                ) : null}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>邮箱</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="请输入邮箱"
-                  placeholderTextColor="#aaa"
-                  value={formData.email}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, email: text })
-                  }
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  editable={!isLoading}
-                />
-                {errors.email ? (
-                  <Text style={styles.errorText}>{errors.email}</Text>
-                ) : null}
-              </View>
-
-              <Text style={styles.sectionTitle}>个人信息</Text>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>性别</Text>
-                <View style={styles.genderContainer}>
-                  <TouchableOpacity
-                    style={[
-                      styles.genderOption,
-                      formData.gender === "male" && styles.selectedGender,
-                    ]}
-                    onPress={() => setFormData({ ...formData, gender: "male" })}
-                    disabled={isLoading}
-                  >
-                    <Text
-                      style={[
-                        styles.genderText,
-                        formData.gender === "male" && styles.selectedGenderText,
-                      ]}
-                    >
-                      男
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.genderOption,
-                      formData.gender === "female" && styles.selectedGender,
-                    ]}
-                    onPress={() =>
-                      setFormData({ ...formData, gender: "female" })
-                    }
-                    disabled={isLoading}
-                  >
-                    <Text
-                      style={[
-                        styles.genderText,
-                        formData.gender === "female" &&
-                          styles.selectedGenderText,
-                      ]}
-                    >
-                      女
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.genderOption,
-                      formData.gender === "other" && styles.selectedGender,
-                    ]}
-                    onPress={() =>
-                      setFormData({ ...formData, gender: "other" })
-                    }
-                    disabled={isLoading}
-                  >
-                    <Text
-                      style={[
-                        styles.genderText,
-                        formData.gender === "other" &&
-                          styles.selectedGenderText,
-                      ]}
-                    >
-                      其他
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                {errors.gender ? (
-                  <Text style={styles.errorText}>{errors.gender}</Text>
-                ) : null}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>出生日期</Text>
-                <TouchableOpacity
-                  style={styles.datePickerButton}
-                  onPress={() => setShowDatePicker(true)}
-                  disabled={isLoading}
-                >
-                  <Text
-                    style={
-                      formData.birthDate
-                        ? styles.dateText
-                        : styles.datePlaceholder
-                    }
-                  >
-                    {formData.birthDate || "请选择出生日期"}
-                  </Text>
-                </TouchableOpacity>
-
-                <SimpleDatePicker
-                  visible={showDatePicker}
-                  onClose={() => setShowDatePicker(false)}
-                  onSelect={handleDateSelect}
-                  currentDate={date}
-                />
-
-                {errors.birthDate ? (
-                  <Text style={styles.errorText}>{errors.birthDate}</Text>
-                ) : null}
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>MBTI人格类型</Text>
-                <TouchableOpacity
-                  style={styles.mbtiPickerButton}
-                  onPress={() => setShowMBTIOptions(!showMBTIOptions)}
-                  disabled={isLoading}
-                >
-                  <Text
-                    style={
-                      formData.mbti ? styles.mbtiText : styles.mbtiPlaceholder
-                    }
-                  >
-                    {formData.mbti || "请选择MBTI类型"}
-                  </Text>
-                </TouchableOpacity>
-                {showMBTIOptions && (
-                  <View style={styles.mbtiOptionsContainer}>
-                    {mbtiTypes.map((type) => (
-                      <TouchableOpacity
-                        key={type}
-                        style={styles.mbtiOption}
-                        onPress={() => selectMBTI(type)}
-                      >
-                        <Text style={styles.mbtiOptionText}>{type}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-                {errors.mbti ? (
-                  <Text style={styles.errorText}>{errors.mbti}</Text>
-                ) : null}
-              </View>
-
-              <View style={styles.buttonContainer}>
-                <CustomButton
-                  title={isLoading ? "保存中..." : "保存修改"}
-                  onPress={handleSave}
-                  disabled={isLoading}
-                />
-              </View>
+        <ImageBackground
+          source={require("../../../assets/background.png")}
+          style={styles.background}
+          resizeMode="cover"
+        >
+          <SafeAreaView style={styles.safeArea}>
+            <View style={styles.header}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => router.back()}
+              >
+                <Text style={styles.backButtonText}>返回</Text>
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>编辑个人资料</Text>
+              <View style={{ width: 50 }} />
             </View>
-          </ScrollView>
-        </SafeAreaView>
+
+            <ScrollView style={styles.scrollView}>
+              <View style={styles.formContainer}>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>用户名</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="请输入用户名"
+                    placeholderTextColor="#aaa"
+                    value={formData.username}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, username: text })
+                    }
+                    editable={!isLoading}
+                  />
+                  {errors.username ? (
+                    <Text style={styles.errorText}>{errors.username}</Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>邮箱</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="请输入邮箱"
+                    placeholderTextColor="#aaa"
+                    value={formData.email}
+                    onChangeText={(text) =>
+                      setFormData({ ...formData, email: text })
+                    }
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    editable={!isLoading}
+                  />
+                  {errors.email ? (
+                    <Text style={styles.errorText}>{errors.email}</Text>
+                  ) : null}
+                </View>
+
+                <Text style={styles.sectionTitle}>个人信息</Text>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>性别</Text>
+                  <View style={styles.genderContainer}>
+                    <TouchableOpacity
+                      style={[
+                        styles.genderOption,
+                        formData.gender === "male" && styles.selectedGender,
+                      ]}
+                      onPress={() =>
+                        setFormData({ ...formData, gender: "male" })
+                      }
+                      disabled={isLoading}
+                    >
+                      <Text
+                        style={[
+                          styles.genderText,
+                          formData.gender === "male" &&
+                            styles.selectedGenderText,
+                        ]}
+                      >
+                        男
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.genderOption,
+                        formData.gender === "female" && styles.selectedGender,
+                      ]}
+                      onPress={() =>
+                        setFormData({ ...formData, gender: "female" })
+                      }
+                      disabled={isLoading}
+                    >
+                      <Text
+                        style={[
+                          styles.genderText,
+                          formData.gender === "female" &&
+                            styles.selectedGenderText,
+                        ]}
+                      >
+                        女
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        styles.genderOption,
+                        formData.gender === "other" && styles.selectedGender,
+                      ]}
+                      onPress={() =>
+                        setFormData({ ...formData, gender: "other" })
+                      }
+                      disabled={isLoading}
+                    >
+                      <Text
+                        style={[
+                          styles.genderText,
+                          formData.gender === "other" &&
+                            styles.selectedGenderText,
+                        ]}
+                      >
+                        其他
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  {errors.gender ? (
+                    <Text style={styles.errorText}>{errors.gender}</Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>出生日期</Text>
+                  <TouchableOpacity
+                    style={styles.datePickerButton}
+                    onPress={() => setShowDatePicker(true)}
+                    disabled={isLoading}
+                  >
+                    <Text
+                      style={
+                        formData.birthDate
+                          ? styles.dateText
+                          : styles.datePlaceholder
+                      }
+                    >
+                      {formData.birthDate || "请选择出生日期"}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <SimpleDatePicker
+                    visible={showDatePicker}
+                    onClose={() => setShowDatePicker(false)}
+                    onSelect={handleDateSelect}
+                    currentDate={date}
+                  />
+
+                  {errors.birthDate ? (
+                    <Text style={styles.errorText}>{errors.birthDate}</Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>MBTI人格类型</Text>
+                  <TouchableOpacity
+                    style={styles.mbtiPickerButton}
+                    onPress={() => setShowMBTIOptions(!showMBTIOptions)}
+                    disabled={isLoading}
+                  >
+                    <Text
+                      style={
+                        formData.mbti ? styles.mbtiText : styles.mbtiPlaceholder
+                      }
+                    >
+                      {formData.mbti || "请选择MBTI类型"}
+                    </Text>
+                  </TouchableOpacity>
+                  {showMBTIOptions && (
+                    <View style={styles.mbtiOptionsContainer}>
+                      {mbtiTypes.map((type) => (
+                        <TouchableOpacity
+                          key={type}
+                          style={styles.mbtiOption}
+                          onPress={() => selectMBTI(type)}
+                        >
+                          <Text style={styles.mbtiOptionText}>{type}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                  {errors.mbti ? (
+                    <Text style={styles.errorText}>{errors.mbti}</Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.buttonContainer}>
+                  <CustomButton
+                    title={isLoading ? "保存中..." : "保存修改"}
+                    onPress={handleSave}
+                    disabled={isLoading}
+                  />
+                </View>
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </ImageBackground>
       </LinearGradient>
     </View>
   );
@@ -672,6 +682,9 @@ const styles = StyleSheet.create({
     color: "#fded13",
     fontSize: 16,
     fontWeight: "500",
+  },
+  background: {
+    flex: 1,
   },
 });
 
