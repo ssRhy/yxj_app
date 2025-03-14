@@ -122,7 +122,7 @@ const SimpleDatePicker = ({
 };
 
 const EditProfilePage = () => {
-  const { user, updateUserInfo } = useUser();
+  const { user, updateUser } = useUser();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -221,7 +221,7 @@ const EditProfilePage = () => {
         };
 
         // 更新用户信息
-        await updateUserInfo(updatedData);
+        await updateUser(updatedData);
 
         Alert.alert("保存成功", "您的个人资料已更新", [
           {

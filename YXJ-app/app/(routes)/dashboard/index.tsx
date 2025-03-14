@@ -13,27 +13,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useUser } from "../../../context/UserContext";
 
-// // 定义健康数据类型
-// interface HealthData {
-//   bmi: number;
-//   bmiStatus: string;
-//   healthScore: number;
-//   bmr: number;
-//   dailyCalories: number;
-// }
-
-// 修改用户类型定义
-interface User {
-  username: string;
-  email: string;
-  gender?: "male" | "female" | "other";
-  birthDate?: string;
-  zodiacSign?: string;
-  mbti?: string;
-  // 修改属性名以匹配 RegisterForm 中的命名
-  chineseBaZi?: string; // 之前是 bazi
-  // height?: number;
-  // weight?: number;
+// 定义健康数据类型
+interface HealthData {
+  bmi: number;
+  bmiStatus: string;
+  healthScore: number;
+  bmr: number;
+  dailyCalories: number;
 }
 
 // MBTI描述函数
@@ -275,73 +261,73 @@ const styles = StyleSheet.create({
 const DashboardPage: React.FC = () => {
   const { user, logout } = useUser();
   const [isLoading, setIsLoading] = useState(true);
-  // const [userData, setUserData] = useState<HealthData>({
-  //   bmi: 0,
-  //   bmiStatus: "",
-  //   healthScore: 0,
-  //   bmr: 0,
-  //   dailyCalories: 0,
-  // });
+  const [userData, setUserData] = useState<HealthData>({
+    bmi: 0,
+    bmiStatus: "",
+    healthScore: 0,
+    bmr: 0,
+    dailyCalories: 0,
+  });
 
   useEffect(() => {
-    // if (user) {
-    //   calculateHealthData(user);
-    // }
+    if (user) {
+      calculateHealthData(user);
+    }
     setIsLoading(false);
   }, [user]);
 
-  // const calculateHealthData = (user: any) => {
-  //   if (user.height && user.weight) {
-  //     const height = user.height / 100; // 转换为米
-  //     const bmi = user.weight / (height * height);
-  //     const bmiStatus = getBMIStatus(bmi);
-  //     const healthScore = calculateHealthScore(bmi);
-  //     const bmr = calculateBMR(user);
-  //     const dailyCalories = bmr * 1.2; // 假设轻度活动水平
+  const calculateHealthData = (user: any) => {
+    if (user.height && user.weight) {
+      const height = user.height / 100; // 转换为米
+      const bmi = user.weight / (height * height);
+      const bmiStatus = getBMIStatus(bmi);
+      const healthScore = calculateHealthScore(bmi);
+      const bmr = calculateBMR(user);
+      const dailyCalories = bmr * 1.2; // 假设轻度活动水平
 
-  //     setUserData({
-  //       bmi,
-  //       bmiStatus,
-  //       healthScore,
-  //       bmr,
-  //       dailyCalories,
-  //     });
-  //   }
-  // };
+      setUserData({
+        bmi,
+        bmiStatus,
+        healthScore,
+        bmr,
+        dailyCalories,
+      });
+    }
+  };
 
-  // const getBMIStatus = (bmi: number): string => {
-  //   if (bmi < 18.5) return "偏瘦";
-  //   if (bmi < 24) return "正常";
-  //   if (bmi < 28) return "偏重";
-  //   return "肥胖";
-  // };
+  const getBMIStatus = (bmi: number): string => {
+    if (bmi < 18.5) return "偏瘦";
+    if (bmi < 24) return "正常";
+    if (bmi < 28) return "偏重";
+    return "肥胖";
+  };
 
-  // const calculateHealthScore = (bmi: number): number => {
-  //   if (bmi >= 18.5 && bmi < 24) return 100;
-  //   if (bmi < 18.5) return 100 - (18.5 - bmi) * 10;
-  //   return 100 - (bmi - 24) * 5;
-  // };
+  const calculateHealthScore = (bmi: number): number => {
+    if (bmi >= 18.5 && bmi < 24) return 100;
+    if (bmi < 18.5) return 100 - (18.5 - bmi) * 10;
+    return 100 - (bmi - 24) * 5;
+  };
 
-  // const calculateBMR = (user: any): number => {
-  //   if (!user.weight || !user.height) return 0;
-  //   // 使用Harris-Benedict公式
-  //   const base = user.gender === "male" ? 88.362 : 447.593;
-  //   const weightFactor = user.gender === "male" ? 13.397 : 9.247;
-  //   const heightFactor = user.gender === "male" ? 4.799 : 3.098;
-  //   const ageFactor = user.gender === "male" ? 5.677 : 4.33;
+  const calculateBMR = (user: any): number => {
+    if (!user.weight || !user.height) return 0;
+    // 使用Harris-Benedict公式
+    const base = user.gender === "male" ? 88.362 : 447.593;
+    const weightFactor = user.gender === "male" ? 13.397 : 9.247;
+    const heightFactor = user.gender === "male" ? 4.799 : 3.098;
+    const ageFactor = user.gender === "male" ? 5.677 : 4.33;
 
-  //   // 假设年龄为25岁，如果没有出生日期
-  //   const age = user.birthDate
-  //     ? new Date().getFullYear() - new Date(user.birthDate).getFullYear()
-  //     : 25;
+    // 假设年龄为25岁，如果没有出生日期
+    const age = user.birthDate
+      ? new Date().getFullYear() - new Date(user.birthDate).getFullYear()
+      : 25;
 
-  //   return (
-  //     base +
-  //     weightFactor * user.weight +
-  //     heightFactor * user.height -
-  //     ageFactor * age
-  //   );
-  // };
+    return (
+      base +
+      weightFactor * user.weight +
+      heightFactor * user.height -
+      ageFactor * age
+    );
+  };
 
   const handleLogout = async () => {
     try {
@@ -387,7 +373,7 @@ const DashboardPage: React.FC = () => {
     <View style={styles.container}>
       <LinearGradient
         style={styles.gradient}
-        colors={["rgba(90, 82, 97, 0.4)", "rgba(22, 29, 247, 0.8)"]}
+        colors={["rgba(90, 82, 97, 0.4)", "rgba(111, 197, 36, 0.8)"]}
       >
         <ImageBackground
           source={require("../../../assets/background.png")}
@@ -483,49 +469,6 @@ const DashboardPage: React.FC = () => {
                   </Text>
                 </View>
               )}
-
-              {/* {typeof user?.height === "number" &&
-                typeof user?.weight === "number" && (
-                  <View style={styles.card}>
-                    <Text style={styles.cardTitle}>健康数据</Text>
-                    <View style={styles.dataRow}>
-                      <View style={styles.dataItem}>
-                        <Text style={styles.dataValue}>
-                          {userData.bmi.toFixed(2)}
-                        </Text>
-                        <Text style={styles.dataLabel}>BMI</Text>
-                      </View>
-                      <View style={styles.dataItem}>
-                        <Text style={styles.dataValue}>
-                          {userData.bmiStatus}
-                        </Text>
-                        <Text style={styles.dataLabel}>状态</Text>
-                      </View>
-                    </View>
-                    <View style={styles.dataRow}>
-                      <View style={styles.dataItem}>
-                        <Text style={styles.dataValue}>
-                          {userData.healthScore}%
-                        </Text>
-                        <Text style={styles.dataLabel}>健康评分</Text>
-                      </View>
-                      <View style={styles.dataItem}>
-                        <Text style={styles.dataValue}>
-                          {userData.bmr.toFixed(2)}
-                        </Text>
-                        <Text style={styles.dataLabel}>基础代谢率</Text>
-                      </View>
-                    </View>
-                    <View style={styles.dataRow}>
-                      <View style={styles.dataItem}>
-                        <Text style={styles.dataValue}>
-                          {userData.dailyCalories.toFixed(2)}
-                        </Text>
-                        <Text style={styles.dataLabel}>每日所需卡路里</Text>
-                      </View>
-                    </View>
-                  </View>
-                )} */}
             </ScrollView>
           </SafeAreaView>
         </ImageBackground>
