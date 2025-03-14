@@ -1,30 +1,65 @@
 import React from "react";
-import { View, Text, Pressable, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  TouchableOpacity,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
 
-interface CustomButtonProps {
-  onPress: () => void;
+export interface CustomButtonProps {
   title: string;
-  textStyles?: string;
-  containerStyles?: string;
+  onPress: () => void;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+  disabled?: boolean;
 }
 
-const CustomButton = ({
-  onPress,
+const CustomButton: React.FC<CustomButtonProps> = ({
   title,
-  textStyles = "",
-  containerStyles = "",
-}: CustomButtonProps) => {
+  onPress,
+  style,
+  textStyle,
+  disabled = false,
+}) => {
   return (
     <TouchableOpacity
-      activeOpacity={0.7}
-      className={`bg-white rounded-xl min-h-[62px] justify-center items-center ${containerStyles} `}
+      style={[styles.button, style, disabled && styles.disabledButton]}
       onPress={onPress}
+      disabled={disabled}
     >
-      <Text className={`text-primary font-semibold text-lg ${textStyles}`}>
+      <Text
+        style={[styles.buttonText, textStyle, disabled && styles.disabledText]}
+      >
         {title}
       </Text>
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: "#fded13",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  disabledButton: {
+    backgroundColor: "#cccccc",
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: "#333",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  disabledText: {
+    color: "rgba(51, 51, 51, 0.5)",
+  },
+});
 
 export default CustomButton;

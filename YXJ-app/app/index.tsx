@@ -5,35 +5,40 @@ import {
   ImageBackground,
   SafeAreaView,
   StyleSheet,
-  TouchableOpacity,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import CustomButton from "../assets/components/CustomButton";
+import BgGradient from "../assets/components/BgGradient";
 
 export default function App() {
   return (
     <View style={styles.container}>
       <ImageBackground
-        source={require("../assets/luopan.jpg")}
+        source={require("../assets/background.png")}
         style={styles.background}
         resizeMode="cover"
+        onError={(e) =>
+          console.error("Image loading error:", e.nativeEvent.error)
+        }
       >
-        <LinearGradient
-          style={styles.gradient}
-          colors={["rgba(0,0,0,0.4)", "rgba(0,0,0,0.8)"]}
+        <BgGradient
+          colors={["rgba(29, 3, 51, 0.4).4)", "rgba(174, 149, 65, 0.8))"]}
         >
           <SafeAreaView style={styles.safeArea}>
             <View>
-              <Text style={styles.welcomeText}>Welcome to the good</Text>
+              <Text style={styles.welcomeText}>Welcome to the good </Text>
               <Text style={styles.titleText}>Personal App</Text>
             </View>
 
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Start</Text>
-              </TouchableOpacity>
+              <CustomButton
+                title="Start"
+                onPress={() => router.push("/(routes)/register")}
+              />
             </View>
           </SafeAreaView>
-        </LinearGradient>
+        </BgGradient>
       </ImageBackground>
     </View>
   );
@@ -53,8 +58,9 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: 4,
+    paddingHorizontal: 20,
     justifyContent: "space-between",
+    paddingVertical: 30,
   },
   welcomeText: {
     textAlign: "center",
@@ -70,21 +76,6 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     paddingBottom: 50,
-  },
-  button: {
-    backgroundColor: "white",
-    padding: 15,
-    borderRadius: 30,
     alignItems: "center",
-    marginHorizontal: 30,
-    marginTop: 100,
-    width: "50%",
-    alignSelf: "center",
-  },
-  buttonText: {
-    fontFamily: "Poppins-Bold",
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
   },
 });

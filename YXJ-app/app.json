@@ -13,18 +13,22 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yxj.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.yxj.app"
     },
     "web": {
+      "bundler": "metro",
       "favicon": "./assets/icon.png"
     },
     "scheme": "yxjapp",
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "plugins": ["expo-router"]
   }
 }

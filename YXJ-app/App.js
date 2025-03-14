@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-/// <reference types="nativewind/types" />
+
 import { StyleSheet, Text, View } from "react-native";
 
 export default function App() {
