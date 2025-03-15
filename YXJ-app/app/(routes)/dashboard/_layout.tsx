@@ -43,6 +43,16 @@ export default function DashboardLayout() {
           ),
         }}
       />
+       <Tabs.Screen
+        name="Learn-library"
+        options={{
+          title: "玄学智库",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="pulse" size={size} color={color} />
+          ),
+        }}
+      />
+      
     </Tabs>
     // Add more screens here as needed
   );

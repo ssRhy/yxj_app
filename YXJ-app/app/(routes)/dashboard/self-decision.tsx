@@ -91,19 +91,24 @@ export default function SelfDecisionScreen() {
 
         {/* Placeholder for parameter settings */}
         <View style={styles.parametersContainer}>
-          <Text style={styles.sectionTitle}>维度参数范围</Text>
+          <Text style={styles.sectionTitle}>维度数据回放</Text>
+          <View style={styles.parameterPlaceholder} className="flex flex-row justify-between ">
+            <Text style={styles.placeholderText}>生物数据在这里显示</Text>
+          </View>
           <View style={styles.parameterPlaceholder}>
             <Text style={styles.placeholderText}>维度参数设置将在此处显示</Text>
-            {/* Future parameters component will be placed here */}
+            {/* 组件1Future parameters component will be placed here */}
           </View>
         </View>
 
         {/* Placeholder for decision result */}
         <View style={styles.resultContainer}>
-          <Text style={styles.sectionTitle}>决策结果</Text>
+          <Text style={styles.sectionTitle}>因果关联</Text>
           <View style={styles.resultPlaceholder}>
-            <Text style={styles.placeholderText}>决策结果将在此处显示</Text>
-            {/* Future result component will be placed here */}
+            <View className="flex flex-col">
+              <Text style={styles.placeholderText}>决策结果将在此处显示</Text>
+            </View>
+            {/* 组件2Future result component will be placed here */}
           </View>
         </View>
 
