@@ -8,6 +8,20 @@ import { useDestinyChart, useDivination } from '../../../hooks';
 import { fetchUserChart, updateChartData } from '../../../services/chartService';
 import { ChartData, GrowthEvent } from '../../../types/chart.types';
 import { DivinationResult } from '../../../types/divination.types';
+import { LinearGradient } from 'expo-linear-gradient';
+
+// 定义主题颜色
+const THEME = {
+  deepPurple: '#2E0854', // 深空紫
+  mediumPurple: '#4A1B7E', // 中紫色
+  lightPurple: '#6B4AA0', // 浅紫色
+  gold: '#D4AF37', // 鎏金色
+  lightGold: '#F2D675', // 浅金色
+  cream: '#FFF8E1', // 奶油色
+  white: '#FFFFFF',
+  text: '#F9F5FF', // 浅色文本
+  darkText: '#1A0E33', // 深色文本
+};
 
 const DestinyChartPage: React.FC = () => {
   const userId = 'user-1'; // 实际应用中应从用户会话或上下文中获取
@@ -90,46 +104,50 @@ const DestinyChartPage: React.FC = () => {
   
   if (loading) {
     return (
-      <View style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <Text style={{
-          marginTop: 16,
-          color: '#718096',
-        }}>加载命盘数据中...</Text>
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>加载命盘数据中...</Text>
       </View>
     );
   }
   
   if (error) {
     return (
-      <View style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <Text style={{
-          color: '#e53e3e',
-        }}>加载失败: {error}</Text>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>加载失败: {error}</Text>
+        <TouchableOpacity style={styles.retryButton}>
+          <Text style={styles.retryButtonText}>重试</Text>
+        </TouchableOpacity>
       </View>
     );
   }
   
   return (
     <ScrollView style={styles.scrollView}>
-      <View style={styles.container}>
+      <LinearGradient
+        colors={[THEME.deepPurple, THEME.mediumPurple]}
+        style={styles.headerGradient}
+      >
         <View style={styles.pageHeader}>
           <Text style={styles.pageTitle}>命运图谱</Text>
           <View style={styles.userLevel}>
-            <Text style={styles.levelText}>等级 {chartData.level}</Text>
+            <View style={styles.levelBadge}>
+              <Text style={styles.levelText}>等级 {chartData.level}</Text>
+            </View>
             <EnergyBadge value={chartData.totalEnergy} size="medium" pulsate={showAnimation} />
           </View>
         </View>
-        
+      </LinearGradient>
+      
+      <View style={styles.container}>
         <View style={styles.chartSection}>
-          <Text style={styles.title}>您的命运图谱</Text>
+          <LinearGradient
+            colors={[THEME.gold, THEME.lightGold]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.titleGradient}
+          >
+            <Text style={styles.title}>您的命运图谱</Text>
+          </LinearGradient>
           <DestinyChart 
             data={chartData}
             level={chartData.level}
@@ -140,14 +158,26 @@ const DestinyChartPage: React.FC = () => {
         </View>
         
         <View style={styles.growthSection}>
-          <Text style={styles.title}>成长记录</Text>
+          <LinearGradient
+            colors={[THEME.gold, THEME.lightGold]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.titleGradient}
+          >
+            <Text style={styles.title}>成长记录</Text>
+          </LinearGradient>
           <View style={styles.growthTimeline}>
             {growthHistory.slice(0, 5).map((event: GrowthEvent) => (
               <View key={event.id} style={styles.growthEvent}>
-                <View style={styles.eventTime}>
-                  <Text style={styles.eventTimeText}>
-                    {new Date(event.timestamp).toLocaleDateString()}
-                  </Text>
+                <View style={styles.eventTimeContainer}>
+                  <LinearGradient
+                    colors={[THEME.gold, THEME.lightGold]}
+                    style={styles.eventTime}
+                  >
+                    <Text style={styles.eventTimeText}>
+                      {new Date(event.timestamp).toLocaleDateString()}
+                    </Text>
+                  </LinearGradient>
                 </View>
                 <View style={styles.eventContent}>
                   <Text style={styles.eventType}>{event.type}</Text>
@@ -163,6 +193,14 @@ const DestinyChartPage: React.FC = () => {
         
         <View style={styles.sideSections}>
           <View style={styles.divinationSection}>
+            <LinearGradient
+              colors={[THEME.gold, THEME.lightGold]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.titleGradient}
+            >
+              <Text style={styles.title}>占卜历史</Text>
+            </LinearGradient>
             <DivinationHistory 
               results={divinationHistory}
               onSelectDivination={(divination) => {
@@ -173,6 +211,14 @@ const DestinyChartPage: React.FC = () => {
           </View>
           
           <View style={styles.tasksSection}>
+            <LinearGradient
+              colors={[THEME.gold, THEME.lightGold]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.titleGradient}
+            >
+              <Text style={styles.title}>修行任务</Text>
+            </LinearGradient>
             <TaskList 
               tasks={tasks}
               onTaskComplete={handleTaskComplete}
@@ -187,13 +233,50 @@ const DestinyChartPage: React.FC = () => {
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: THEME.deepPurple,
+  },
+  headerGradient: {
+    paddingTop: 20,
+    paddingBottom: 15,
   },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
     alignItems: 'center',
     width: '100%',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: THEME.deepPurple,
+  },
+  loadingText: {
+    marginTop: 16,
+    color: THEME.gold,
+    fontSize: 18,
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: THEME.deepPurple,
+    padding: 20,
+  },
+  errorText: {
+    color: THEME.gold,
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: THEME.gold,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  retryButtonText: {
+    color: THEME.deepPurple,
+    fontWeight: 'bold',
   },
   pageHeader: {
     flexDirection: 'row',
@@ -201,21 +284,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     paddingHorizontal: 15,
-    marginBottom: 24,
   },
   pageTitle: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: THEME.gold,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
   userLevel: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  levelBadge: {
+    backgroundColor: THEME.gold,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    marginRight: 10,
+  },
   levelText: {
-    marginRight: 12,
+    color: THEME.deepPurple,
+    fontWeight: 'bold',
   },
   chartSection: {
-    backgroundColor: 'white',
+    backgroundColor: THEME.mediumPurple,
     borderRadius: 10,
     padding: 15,
     marginTop: 20,
@@ -225,16 +319,27 @@ const styles = StyleSheet.create({
     width: '95%',
     maxWidth: 500,
     alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
+  },
+  titleGradient: {
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    marginBottom: 15,
+    alignSelf: 'center',
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
-    marginVertical: 10,
+    color: THEME.deepPurple,
     textAlign: 'center',
   },
   growthSection: {
-    backgroundColor: 'white',
+    backgroundColor: THEME.mediumPurple,
     borderRadius: 10,
     padding: 15,
     marginTop: 20,
@@ -243,35 +348,49 @@ const styles = StyleSheet.create({
     width: '95%',
     maxWidth: 500,
     alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   growthTimeline: {
     width: '100%',
   },
   growthEvent: {
     flexDirection: 'row',
-    backgroundColor: '#f9fafb',
+    backgroundColor: THEME.lightPurple,
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
   },
-  eventTime: {
+  eventTimeContainer: {
     minWidth: 100,
   },
+  eventTime: {
+    borderRadius: 5,
+    padding: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   eventTimeText: {
-    color: '#718096',
+    color: THEME.deepPurple,
+    fontWeight: 'bold',
   },
   eventContent: {
     flex: 1,
+    marginLeft: 10,
   },
   eventType: {
     fontWeight: 'bold',
     marginBottom: 4,
+    color: THEME.white,
   },
   eventDescription: {
-    color: '#4a5568',
+    color: THEME.text,
   },
   eventEnergy: {
-    color: '#48bb78',
+    color: THEME.gold,
     fontWeight: 'bold',
     marginTop: 4,
   },
@@ -282,17 +401,27 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   divinationSection: {
-    backgroundColor: 'white',
+    backgroundColor: THEME.mediumPurple,
     borderRadius: 10,
     padding: 15,
     marginTop: 20,
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   tasksSection: {
-    backgroundColor: 'white',
+    backgroundColor: THEME.mediumPurple,
     borderRadius: 10,
     padding: 15,
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
 });
 

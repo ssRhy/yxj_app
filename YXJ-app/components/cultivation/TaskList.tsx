@@ -112,7 +112,7 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskComplete }) => 
 const styles = StyleSheet.create({
   taskList: {
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#aa96da',
     borderRadius: 8,
   },
   title: {

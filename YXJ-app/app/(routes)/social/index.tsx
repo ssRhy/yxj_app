@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import RecommendedPartners from '../../../components/social/RecommendedPartners';
 import PopularActivities from '../../../components/social/PopularActivities';
@@ -72,19 +72,10 @@ export default function SocialScreen() {
     );
   }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>能量共振社区</Text>
-        <TouchableOpacity onPress={navigateToMessages} style={styles.messageIcon}>
-          <Image 
-            source={require('../../../assets/icons/message.png')} 
-            style={styles.icon}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.content}>
+  // 创建一个渲染函数来处理不同的内容部分
+  const renderContent = () => {
+    return (
+      <>
         <View style={styles.welcomeBanner}>
           <Text style={styles.welcomeTitle}>欢迎来到社交广场</Text>
           <Text style={styles.welcomeText}>在这里发现志同道合的伙伴，一起探索更多可能</Text>
@@ -109,7 +100,28 @@ export default function SocialScreen() {
           </View>
           <PopularActivities activities={activities} />
         </View>
+      </>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>能量共振社区</Text>
+        <TouchableOpacity onPress={navigateToMessages} style={styles.messageIcon}>
+          <Image 
+            source={require('../../../assets/icons/message.png')} 
+            style={styles.icon}
+          />
+        </TouchableOpacity>
       </View>
+
+      <FlatList
+        style={styles.content}
+        data={[{ key: 'content' }]}
+        renderItem={() => renderContent()}
+        showsVerticalScrollIndicator={false}
+      />
 
       <View style={styles.navigationBar}>
         <TouchableOpacity style={styles.navItem} onPress={() => {}}>
@@ -136,13 +148,6 @@ export default function SocialScreen() {
           <Text style={styles.navText}>消息</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.navItem} onPress={navigateToProfile}>
-          <Image 
-            source={require('../../../assets/icons/user.png')} 
-            style={styles.navIcon}
-          />
-          <Text style={styles.navText}>我的</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );

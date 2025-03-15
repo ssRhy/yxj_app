@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import PartnersList from '../../../components/social/PartnersList';
 import FilterTags from '../../../components/social/FilterTags';
@@ -94,7 +94,7 @@ export default function ExploreScreen() {
         />
       </View>
 
-      <ScrollView style={styles.resultsContainer}>
+      <View style={styles.resultsContainer}>
         {loading ? (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>正在加载伙伴...</Text>
@@ -114,7 +114,7 @@ export default function ExploreScreen() {
         ) : (
           <PartnersList partners={partners} />
         )}
-      </ScrollView>
+      </View>
 
       <View style={styles.navigationBar}>
         <TouchableOpacity style={styles.navItem} onPress={navigateToHome}>
@@ -141,13 +141,7 @@ export default function ExploreScreen() {
           <Text style={styles.navText}>消息</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.navItem} onPress={navigateToProfile}>
-          <Image 
-            source={require('../../../assets/icons/user.png')} 
-            style={styles.navIcon}
-          />
-          <Text style={styles.navText}>我的</Text>
-        </TouchableOpacity>
+       
       </View>
     </View>
   );

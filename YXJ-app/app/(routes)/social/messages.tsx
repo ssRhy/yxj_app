@@ -135,14 +135,6 @@ export default function MessagesScreen() {
           />
           <Text style={[styles.navText, styles.activeNavText]}>消息</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem} onPress={navigateToProfile}>
-          <Image 
-            source={require('../../../assets/icons/user.png')} 
-            style={styles.navIcon}
-          />
-          <Text style={styles.navText}>我的</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
