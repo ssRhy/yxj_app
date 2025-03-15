@@ -52,6 +52,15 @@ export default function DashboardLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="social"
+        options={{
+          title: "社交广场",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people" size={size} color={color} />
+          ),
+        }}
+      />
       
     </Tabs>
     // Add more screens here as needed
