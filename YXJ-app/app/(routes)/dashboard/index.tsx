@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
 import {
   View,
   Text,
@@ -7,6 +8,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ImageBackground,
+  ViewStyle,
+  TextStyle,
+  TouchableOpacityProps,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -23,7 +27,7 @@ interface HealthData {
 }
 
 // MBTI描述函数
-const getMBTIDescription = (mbtiType: string): string => {
+function getMBTIDescription(mbtiType: string): string {
   const descriptions: Record<string, string> = {
     INTJ: "建筑师型人格 - 富有想象力和战略性的思考者",
     INTP: "逻辑学家型人格 - 创新的发明家",
@@ -35,7 +39,7 @@ const getMBTIDescription = (mbtiType: string): string => {
 };
 
 // 简单的星座描述
-const getZodiacDescription = (zodiac: string): string => {
+function getZodiacDescription(zodiac: string): string {
   const descriptions: Record<string, string> = {
     白羊座: "充满活力、直率、勇敢，是十二星座中最具冒险精神的星座。",
     金牛座: "务实、可靠、耐心，喜欢稳定和安全感，对物质享受有很高的追求。",
@@ -55,24 +59,31 @@ const getZodiacDescription = (zodiac: string): string => {
 };
 
 // 自定义按钮组件
-const CustomButton: React.FC<{
+interface CustomButtonProps extends TouchableOpacityProps {
   title: string;
   onPress: () => void;
-}> = ({ title, onPress }) => (
-  <TouchableOpacity
-    style={{
-      backgroundColor: "rgba(253, 237, 19, 0.2)",
-      padding: 10,
-      borderRadius: 8,
-      alignItems: "center",
-    }}
-    onPress={onPress}
-  >
-    <Text style={{ color: "#fded13", fontSize: 16, fontWeight: "500" }}>
-      {title}
-    </Text>
-  </TouchableOpacity>
-);
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+}
+
+const CustomButton: FunctionComponent<CustomButtonProps> = ({
+  title,
+  onPress,
+  style,
+  textStyle,
+  ...props
+}) => {
+  return (
+    <TouchableOpacity
+      style={[styles.button, style]}
+      onPress={onPress}
+      activeOpacity={0.7}
+      {...props}
+    >
+      <Text style={[styles.buttonText, textStyle]}>{title}</Text>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -256,27 +267,34 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
+  button: {
+    backgroundColor: "rgba(253, 237, 19, 0.2)",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fded13",
+    fontSize: 16,
+    fontWeight: "500",
+  },
 });
 
-const DashboardPage: React.FC = () => {
+// 仪表盘页面组件
+const DashboardPage: FunctionComponent = () => {
+  const [healthData, setHealthData] = useState<HealthData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user, logout } = useUser();
-  const [isLoading, setIsLoading] = useState(true);
-  const [userData, setUserData] = useState<HealthData>({
-    bmi: 0,
-    bmiStatus: "",
-    healthScore: 0,
-    bmr: 0,
-    dailyCalories: 0,
-  });
 
   useEffect(() => {
     if (user) {
       calculateHealthData(user);
     }
-    setIsLoading(false);
+    setLoading(false);
   }, [user]);
 
-  const calculateHealthData = (user: any) => {
+  function calculateHealthData(user: any) {
     if (user.height && user.weight) {
       const height = user.height / 100; // 转换为米
       const bmi = user.weight / (height * height);
@@ -285,7 +303,7 @@ const DashboardPage: React.FC = () => {
       const bmr = calculateBMR(user);
       const dailyCalories = bmr * 1.2; // 假设轻度活动水平
 
-      setUserData({
+      setHealthData({
         bmi,
         bmiStatus,
         healthScore,
@@ -295,20 +313,20 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const getBMIStatus = (bmi: number): string => {
+  function getBMIStatus(bmi: number): string {
     if (bmi < 18.5) return "偏瘦";
     if (bmi < 24) return "正常";
     if (bmi < 28) return "偏重";
     return "肥胖";
   };
 
-  const calculateHealthScore = (bmi: number): number => {
+  function calculateHealthScore(bmi: number): number {
     if (bmi >= 18.5 && bmi < 24) return 100;
     if (bmi < 18.5) return 100 - (18.5 - bmi) * 10;
     return 100 - (bmi - 24) * 5;
   };
 
-  const calculateBMR = (user: any): number => {
+  function calculateBMR(user: any): number {
     if (!user.weight || !user.height) return 0;
     // 使用Harris-Benedict公式
     const base = user.gender === "male" ? 88.362 : 447.593;
@@ -329,26 +347,21 @@ const DashboardPage: React.FC = () => {
     );
   };
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.replace("/(routes)/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+  function handleLogout() {
+    logout().then(() => router.replace("/(routes)/login"));
   };
 
-  const handleEditProfile = () => {
+  function handleEditProfile() {
     router.push("/(routes)/profile/edit");
   };
 
-  const formatDate = (dateString: string): string => {
+  function formatDate(dateString: string): string {
     if (!dateString) return "未设置";
     const date = new Date(dateString);
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#fded13" />
@@ -373,7 +386,7 @@ const DashboardPage: React.FC = () => {
     <View style={styles.container}>
       <LinearGradient
         style={styles.gradient}
-        colors={["rgba(90, 82, 97, 0.4)", "rgba(111, 197, 36, 0.8)"]}
+        colors={["rgba(90, 82, 97, 0.4)", "rgba(133, 12, 199, 0.8)"]}
       >
         <ImageBackground
           source={require("../../../assets/background.png")}

@@ -34,6 +34,16 @@ export default function DashboardLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="realtime-energy"
+        options={{
+          title: "实时能量场",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="pulse" size={size} color={color} />
+          ),
+        }}
+      />
     </Tabs>
+    // Add more screens here as needed
   );
 }

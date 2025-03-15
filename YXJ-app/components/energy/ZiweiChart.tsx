@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -181,36 +181,73 @@ const samplePalaces: Palace[] = [
 const ZiweiChart: React.FC = () => {
   const [selectedPalace, setSelectedPalace] = useState<Palace | null>(null);
   const [scale, setScale] = useState(1);
-  const pan = new Animated.ValueXY();
+  const pan = useRef(new Animated.ValueXY()).current;
+  const lastScale = useRef(1);
+  const lastDistance = useRef(0);
+  const panOffset = useRef({ x: 0, y: 0 });
 
   // 处理缩放和平移
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: (_, gestureState) => {
+      return (
+        gestureState.numberActiveTouches === 2 ||
+        Math.abs(gestureState.dx) > 10 ||
+        Math.abs(gestureState.dy) > 10
+      );
+    },
+    onPanResponderGrant: () => {
+      panOffset.current = {
+        x: 0,
+        y: 0,
+      };
+      lastDistance.current = 0;
+    },
     onPanResponderMove: (evt, gestureState) => {
-      // 处理双指缩放
-      if (evt.nativeEvent.changedTouches.length > 1) {
-        const touch1 = evt.nativeEvent.changedTouches[0];
-        const touch2 = evt.nativeEvent.changedTouches[1];
+      const touches = evt.nativeEvent.touches;
+
+      if (touches.length === 2) {
+        const touch1 = touches[0];
+        const touch2 = touches[1];
 
         const distance = Math.sqrt(
           Math.pow(touch2.pageX - touch1.pageX, 2) +
             Math.pow(touch2.pageY - touch1.pageY, 2)
         );
 
-        // 根据手指移动距离调整缩放比例
-        const newScale = Math.max(0.5, Math.min(2, scale + distance / 1000));
+        if (lastDistance.current === 0) {
+          lastDistance.current = distance;
+          return;
+        }
+
+        const distanceChange = distance - lastDistance.current;
+        const newScale = Math.max(
+          0.5,
+          Math.min(2.5, scale + distanceChange / 100)
+        );
         setScale(newScale);
-      } else {
-        // 处理单指平移
-        Animated.event([null, { dx: pan.x, dy: pan.y }], {
-          useNativeDriver: false,
-        })(evt, gestureState);
+        lastDistance.current = distance;
+      } else if (touches.length === 1) {
+        pan.setValue({
+          x: gestureState.dx + panOffset.current.x,
+          y: gestureState.dy + panOffset.current.y,
+        });
       }
     },
     onPanResponderRelease: () => {
+      lastDistance.current = 0;
       Animated.spring(pan, {
         toValue: { x: 0, y: 0 },
         useNativeDriver: false,
+        friction: 7,
+      }).start();
+    },
+    onPanResponderTerminate: () => {
+      lastDistance.current = 0;
+      Animated.spring(pan, {
+        toValue: { x: 0, y: 0 },
+        useNativeDriver: false,
+        friction: 7,
       }).start();
     },
   });

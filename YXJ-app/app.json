@@ -23,12 +23,17 @@
       },
       "package": "com.yxj.app"
     },
-    "web": {
-      "bundler": "metro",
-      "favicon": "./assets/icon.png"
-    },
     "scheme": "yxjapp",
     "newArchEnabled": true,
-    "plugins": ["expo-router"]
+    "plugins": ["expo-router"],
+    "updates": {
+      "enabled": false,
+      "checkAutomatically": "ON_ERROR_RECOVERY"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    }
   }
 }
