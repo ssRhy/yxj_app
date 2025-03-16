@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -10,10 +10,24 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import CustomButton from "../assets/components/CustomButton";
 import BgGradient from "../assets/components/BgGradient";
+import AuthInitializer from "../components/auth/AuthInitializer";
+import { useUser } from "../context/UserContext";
 
 export default function App() {
+  const { user } = useUser();
+
+  // If user is already logged in, redirect to dashboard
+  useEffect(() => {
+    if (user) {
+      router.replace("/(routes)/dashboard");
+    }
+  }, [user]);
+
   return (
     <View style={styles.container}>
+      {/* AuthInitializer will check for saved credentials and redirect if needed */}
+      <AuthInitializer />
+      
       <ImageBackground
         source={require("../assets/background.png")}
         style={styles.background}
@@ -23,7 +37,7 @@ export default function App() {
         }
       >
         <BgGradient
-          colors={["rgba(29, 3, 51, 0.4).4)", "rgba(174, 149, 65, 0.8))"]}
+          colors={["rgba(29, 3, 51, 0.4)", "rgba(174, 149, 65, 0.8)"]}
         >
           <SafeAreaView style={styles.safeArea}>
             <View>
