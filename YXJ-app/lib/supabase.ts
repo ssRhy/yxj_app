@@ -4,14 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Database } from '../database.types'
 
 // 初始化Supabase客户端
-const supabaseUrl = process.env.SUPABASE_URL!
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!
+const supabaseUrl = "https://linrhaxmzakxedfowuke.supabase.co"
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpbnJoYXhtemFreGVkZm93dWtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIwOTAxMTgsImV4cCI6MjA1NzY2NjExOH0.QpnSI8T5TvMi9EGMU2jrrsGtDVYRVuBpJFIuyDaK67I"
 
 // 创建强类型的Supabase客户端
-export const supabase = createClient<Database>(
-  supabaseUrl,
-  supabaseAnonKey,
-  {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     auth: {
       storage: AsyncStorage,
       autoRefreshToken: true,

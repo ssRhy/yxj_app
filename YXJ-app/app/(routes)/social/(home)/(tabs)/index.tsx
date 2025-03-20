@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { ChannelList } from 'stream-chat-expo';
 import { router } from 'expo-router';
 
-export default function MainTabScreen() {
+export default function SocialScreen() {
   return (
     <View style={{ flex: 1 }}>
       <ChannelList 
