@@ -15,9 +15,9 @@ export default function TabsNavigator() {
         }}
       />
       <Tabs.Screen
-        name="login"
+        name="profile"
         options={{
-          title: 'Login',
+          title: 'Profile',
           tabBarIcon: ({ size, color }) => (
             <FontAwesome5 name="user-alt" size={size} color={color} />
           ),

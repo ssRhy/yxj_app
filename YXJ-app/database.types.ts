@@ -18,6 +18,9 @@ export type Database = {
           username: string
           birth_date: string
           avatar_url?: string
+          full_name?: string
+          website?: string
+          updated_at?: string
         }
         Insert: {
           id: string
@@ -25,12 +28,18 @@ export type Database = {
           username: string
           birth_date: string
           avatar_url?: string
+          full_name?: string
+          website?: string
+          updated_at?: string
         }
         Update: {
           email?: string
           username?: string
           birth_date?: string
           avatar_url?: string
+          full_name?: string
+          website?: string
+          updated_at?: string
         }
       }
       destiny_charts: {
