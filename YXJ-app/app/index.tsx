@@ -13,6 +13,8 @@ import BgGradient from "../assets/components/BgGradient";
 import AuthInitializer from "../components/auth/AuthInitializer";
 import { useUser } from "../context/UserContext";
 
+
+
 export default function App() {
   const { user } = useUser();
 

@@ -1,3 +1,11 @@
+//能量上下文来管理能量数据
+//使用React的Context API提供了：
+
+// 全局状态管理，包括当前能量和历史记录
+// 加载状态管理
+// 刷新数据的方法
+// 添加新记录的方法
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { energyService, EnergyRecord } from '../services/energyService';
 
