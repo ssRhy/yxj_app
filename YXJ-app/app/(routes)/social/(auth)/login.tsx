@@ -18,6 +18,8 @@ AppState.addEventListener('change', (state) => {
 export default function Auth() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [username, setUsername] = useState('')
+  const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function signInWithEmail() {
@@ -33,17 +35,56 @@ export default function Auth() {
 
   async function signUpWithEmail() {
     setLoading(true)
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    })
+    try {
+      // 1. 注册用户
+      const {
+        data: { session, user },
+        error: signUpError,
+      } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            username: username,
+            full_name: fullName,
+          },
+        },
+      })
 
-    if (error) Alert.alert(error.message)
-    if (!session) Alert.alert('Please check your inbox for email verification!')
-    setLoading(false)
+      if (signUpError) {
+        Alert.alert('注册错误', signUpError.message)
+        return
+      }
+
+      if (!user) {
+        Alert.alert('注册错误', '用户创建失败')
+        return
+      }
+
+      // 2. 创建用户资料
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: user.id,
+          email: email,
+          username: username,
+          full_name: fullName,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+
+      if (profileError) {
+        console.error('创建用户资料失败:', profileError)
+        Alert.alert('注册成功，但创建资料失败', profileError.message)
+      } else {
+        Alert.alert('注册成功', '请检查您的邮箱以确认您的账户')
+      }
+    } catch (error) {
+      console.error('注册过程中出错:', error)
+      Alert.alert('注册错误', error instanceof Error ? error.message : '未知错误')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

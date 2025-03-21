@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../../../../lib/supabase'
-import { StyleSheet, View, Alert } from 'react-native'
+import { StyleSheet, View, Alert, ScrollView } from 'react-native'
 import { Button, Input } from '@rneui/themed'
 import { useAuth } from '../../providers/AuthProvider';
-
+import Avatar from '../../../../../components/avatar';
 export default function ProfileScreen() {
   const { session } = useAuth();
   const [loading, setLoading] = useState(true)
@@ -21,27 +21,37 @@ export default function ProfileScreen() {
       setLoading(true)
       if (!session?.user) throw new Error('No user on the session!')
 
+      console.log('Fetching profile for user ID:', session?.user.id)
+
       const { data, error, status } = await supabase
         .from('users')
-        .select(`username, website, avatar_url, full_name`)
+        .select('*')
         .eq('id', session?.user.id)
         .single()
+
       if (error && status !== 406) {
         console.error('Error fetching user profile:', error)
         throw error
       }
 
       if (data) {
-        setUsername(data.username)
-        setFullName(data.full_name)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
-      
+        console.log('User profile data:', data)
+        setUsername(data.username || '')
+        setFullName(data.full_name || '')
+        setWebsite(data.website || '')
+        setAvatarUrl(data.avatar_url || '')
+      } else {
+        console.log('No user profile found, may need to create one')
+        // 如果没有找到用户资料，可以设置默认值
+        setUsername('')
+        setFullName('')
+        setWebsite('')
+        setAvatarUrl('')
       }
     } catch (error) {
       console.error('Error in getProfile:', error)
       if (error instanceof Error) {
-        Alert.alert(error.message)
+        Alert.alert('Error fetching profile', error.message)
       }
     } finally {
       setLoading(false)
@@ -57,34 +67,54 @@ export default function ProfileScreen() {
     username: string
     full_name: string
     website: string
-    avatar_url: string
+    avatar_url: string | null
   }) {
     try {
       setLoading(true)
       if (!session?.user) throw new Error('No user on the session!')
 
+      console.log('Current session:', JSON.stringify(session, null, 2))
+      console.log('Updating profile with avatar_url:', avatar_url)
+
+      // 确保 avatar_url 是有效的
+      let validAvatarUrl = avatar_url
+      if (!avatar_url || avatar_url.trim() === '') {
+        console.log('Empty avatar_url, using null')
+        validAvatarUrl = null
+      }
+
       const updates = {
+        id: session?.user.id, 
+        email: session?.user.email,
         username,
         full_name,
         website,
-        avatar_url,
-        updated_at: new Date(),
+        avatar_url: validAvatarUrl,
+        updated_at: new Date().toISOString(),
       }
 
       console.log('Attempting to update profile with data:', updates)
+      console.log('Session user ID:', session?.user.id)
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('users')
-        .update(updates)
-        .eq('id', session?.user.id)
+        .upsert(updates, {
+          onConflict: 'id',
+          ignoreDuplicates: false
+        })
+        .select()
 
       if (error) {
         console.error('Supabase error:', JSON.stringify(error, null, 2))
         throw error
       }
 
+      console.log('Upsert successful:', data)
       console.log('Profile updated successfully')
       Alert.alert('Success', 'Profile updated successfully')
+      
+      // 刷新用户资料
+      getProfile()
     } catch (error) {
       console.error('Error updating profile:', error)
       if (error instanceof Error) {
@@ -95,10 +125,27 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false)
     }
+    
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
+      <View style={styles.avatarContainer}>
+        <Avatar
+          size={150}
+          url={avatarUrl}
+          onUpload={(path: string) => {
+            console.log('Avatar uploaded, path:', path)
+            setAvatarUrl(path)
+            updateProfile({ 
+              username, 
+              full_name, 
+              website, 
+              avatar_url: path
+            })
+          }}
+        />
+      </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Input label="Email" value={session?.user?.email} disabled />
       </View>
@@ -115,15 +162,20 @@ export default function ProfileScreen() {
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button
           title={loading ? 'Loading ...' : 'Update'}
-          onPress={() => updateProfile({ username, full_name,  website, avatar_url: avatarUrl })}
+          onPress={() => updateProfile({ 
+            username, 
+            full_name, 
+            website, 
+            avatar_url: avatarUrl ? avatarUrl : null 
+          })}
           disabled={loading}
         />
       </View>
 
-      <View style={styles.verticallySpaced}>
+      <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
       </View>
-    </View>
+    </ScrollView>
   )
 }
 
@@ -131,6 +183,11 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 40,
     padding: 12,
+  },
+  avatarContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 1000,
   },
   verticallySpaced: {
     paddingTop: 4,
