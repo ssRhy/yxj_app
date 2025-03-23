@@ -14,7 +14,7 @@ export const userService = {
 
     // 获取用户详细信息
     const { data } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', user.id)
       .single();
@@ -37,7 +37,7 @@ export const userService = {
    * @param password 密码
    * @param userData 用户数据
    */
-  async register(email: string, password: string, userData: Omit<TableInsert<'users'>, 'id'>) {
+  async register(email: string, password: string, userData: Omit<TableInsert<'profiles'>, 'id'>) {
     // 创建认证用户
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
@@ -50,7 +50,7 @@ export const userService = {
 
     // 创建用户资料
     const { error: profileError } = await supabase
-      .from('users')
+      .from('profiles')
       .insert({
         id: authData.user.id,
         ...userData

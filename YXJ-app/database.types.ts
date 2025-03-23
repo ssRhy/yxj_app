@@ -10,7 +10,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      users: {
+      profiles: {
         Row: {
           id: string
           created_at: string

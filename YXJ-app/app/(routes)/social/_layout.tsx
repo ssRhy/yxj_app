@@ -7,11 +7,11 @@ import AuthProvider from './providers/AuthProvider';
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ChatProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <ChatProvider>
           <Stack screenOptions={{ headerShown: false }} />
-        </AuthProvider>
-      </ChatProvider>
+        </ChatProvider>
+      </AuthProvider>
     </GestureHandlerRootView>
   );
 }

@@ -63,7 +63,7 @@ export default function Auth() {
 
       // 2. 创建用户资料
       const { error: profileError } = await supabase
-        .from('users')
+        .from('profiles')
         .insert({
           id: user.id,
           email: email,

@@ -24,7 +24,7 @@ export default function ProfileScreen() {
       console.log('Fetching profile for user ID:', session?.user.id)
 
       const { data, error, status } = await supabase
-        .from('users')
+        .from('profiles')
         .select('*')
         .eq('id', session?.user.id)
         .single()
@@ -97,7 +97,7 @@ export default function ProfileScreen() {
       console.log('Session user ID:', session?.user.id)
 
       const { data, error } = await supabase
-        .from('users')
+        .from('profiles')
         .upsert(updates, {
           onConflict: 'id',
           ignoreDuplicates: false
