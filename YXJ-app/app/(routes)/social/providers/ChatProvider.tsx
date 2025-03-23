@@ -59,7 +59,7 @@ export default function ChatProvider({ children }: PropsWithChildren) {
         setIsConnected(false);
       }
 
-      // 处理头像 URL
+      // 预先处理头像 URL，避免在连接时处理
       let imageUrl = null;
       if (profile.avatar_url) {
         try {
@@ -73,7 +73,6 @@ export default function ChatProvider({ children }: PropsWithChildren) {
               .getPublicUrl(profile.avatar_url);
             imageUrl = data?.publicUrl || null;
           }
-          console.log("ChatProvider: 处理后的头像 URL:", imageUrl);
         } catch (error) {
           console.error("ChatProvider: 处理头像 URL 出错:", error);
           imageUrl = null;
@@ -114,11 +113,11 @@ export default function ChatProvider({ children }: PropsWithChildren) {
       return;
     }
 
-    // 使用防抖函数避免频繁重连
+    // 减少防抖时间，加快连接速度
     const connectTimeout = setTimeout(() => {
       connectUser();
       setIsReady(true);
-    }, 500);
+    }, 200); // 从 500ms 减少到 200ms
 
     return () => {
       clearTimeout(connectTimeout);
