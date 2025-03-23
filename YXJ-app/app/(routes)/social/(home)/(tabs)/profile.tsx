@@ -4,6 +4,8 @@ import { StyleSheet, View, Alert, ScrollView } from 'react-native'
 import { Button, Input } from '@rneui/themed'
 import { useAuth } from '../../providers/AuthProvider';
 import Avatar from '../../../../../components/avatar';
+import { router } from 'expo-router';
+
 export default function ProfileScreen() {
   const { session } = useAuth();
   const [loading, setLoading] = useState(true)
@@ -173,7 +175,23 @@ export default function ProfileScreen() {
       </View>
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+        <Button title="Sign Out" onPress={async () => {
+          try {
+            // 先导航到登录页面，然后再断开连接和登出
+            // 这样可以避免在断开连接后尝试使用频道
+            router.replace('/social/(auth)/login');
+            
+            // 短暂延迟，确保导航完成
+            setTimeout(async () => {
+              // 登出 Supabase
+              await supabase.auth.signOut();
+              console.log('已成功登出');
+            }, 500);
+          } catch (error) {
+            console.error('登出时出错:', error);
+            Alert.alert('登出失败', '请重试');
+          }
+        }} />
       </View>
     </ScrollView>
   )

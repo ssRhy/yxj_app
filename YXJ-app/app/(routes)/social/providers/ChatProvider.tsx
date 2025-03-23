@@ -49,12 +49,37 @@ export default function ChatProvider({ children }: PropsWithChildren) {
           image: profile.avatar_url,
         });
 
+        // 处理头像 URL
+        let imageUrl = null;
+        if (profile.avatar_url) {
+          try {
+            // 检查是否是完整的 URL
+            if (profile.avatar_url.startsWith('http')) {
+              imageUrl = profile.avatar_url;
+            } else {
+              // 如果是存储路径，获取公共 URL
+              const { data } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(profile.avatar_url);
+              imageUrl = data?.publicUrl || null;
+            }
+            console.log("ChatProvider: 处理后的头像 URL:", imageUrl);
+          } catch (error) {
+            console.error("ChatProvider: 处理头像 URL 出错:", error);
+            imageUrl = null;
+          }
+        }
+
         // 连接用户
         await client.connectUser(
           {
             id: profile.id,
             name: profile.full_name || profile.username || profile.email,
-            image: profile.avatar_url,
+            image: imageUrl,
+            user_details: {
+              email: profile.email,
+              username: profile.username || profile.email.split('@')[0],
+            },
           },
           client.devToken(profile.id)
         );

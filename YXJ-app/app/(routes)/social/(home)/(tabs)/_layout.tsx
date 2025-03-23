@@ -1,8 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useAuth } from '../../providers/AuthProvider';
 
 export default function TabsNavigator() {
+  const { session, profile } = useAuth();
+
+  useEffect(() => {
+    console.log('TabsNavigator: 加载标签页布局', { 
+      hasSession: !!session, 
+      hasProfile: !!profile 
+    });
+  }, [session, profile]);
+
   return (
     <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen
