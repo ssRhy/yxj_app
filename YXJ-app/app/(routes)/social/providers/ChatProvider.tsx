@@ -1,8 +1,14 @@
-import { PropsWithChildren, createContext, useContext, useEffect, useState } from 'react';
-import { StreamChat } from 'stream-chat';
-import { Chat, OverlayProvider } from 'stream-chat-expo';
-import { useAuth } from './AuthProvider';
-import { supabase } from '../../../../lib/supabase';
+import {
+  PropsWithChildren,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { StreamChat } from "stream-chat";
+import { Chat, OverlayProvider } from "stream-chat-expo";
+import { useAuth } from "./AuthProvider";
+import { supabase } from "../../../../lib/supabase";
 
 // 创建一个新的上下文来管理 Stream Chat 状态
 type ChatContextType = {
@@ -17,7 +23,7 @@ const ChatContext = createContext<ChatContextType | null>(null);
 export const useChatClient = () => {
   const context = useContext(ChatContext);
   if (!context) {
-    throw new Error('useChatClient must be used within a ChatProvider');
+    throw new Error("useChatClient must be used within a ChatProvider");
   }
   return context;
 };
@@ -25,11 +31,11 @@ export const useChatClient = () => {
 // 创建 Stream Chat 客户端实例
 const apiKey = process.env.EXPO_PUBLIC_STREAM_API_KEY;
 if (!apiKey) {
-  console.error('Stream Chat API key is not defined');
+  console.error("Stream Chat API key is not defined");
 }
 
 // 创建全局客户端实例
-const client = StreamChat.getInstance(apiKey || '');
+const client = StreamChat.getInstance(apiKey || "");
 
 export default function ChatProvider({ children }: PropsWithChildren) {
   const [isReady, setIsReady] = useState(false);
@@ -47,14 +53,20 @@ export default function ChatProvider({ children }: PropsWithChildren) {
     try {
       // 如果已经连接了相同的用户，不需要重新连接
       if (client.userID === profile.id) {
-        console.log("ChatProvider: User already connected with ID:", profile.id);
+        console.log(
+          "ChatProvider: User already connected with ID:",
+          profile.id
+        );
         setIsConnected(true);
         return;
       }
 
       // 如果连接了不同的用户，先断开连接
       if (client.userID) {
-        console.log("ChatProvider: Disconnecting previous user:", client.userID);
+        console.log(
+          "ChatProvider: Disconnecting previous user:",
+          client.userID
+        );
         await client.disconnectUser();
         setIsConnected(false);
       }
@@ -64,12 +76,12 @@ export default function ChatProvider({ children }: PropsWithChildren) {
       if (profile.avatar_url) {
         try {
           // 检查是否是完整的 URL
-          if (profile.avatar_url.startsWith('http')) {
+          if (profile.avatar_url.startsWith("http")) {
             imageUrl = profile.avatar_url;
           } else {
             // 如果是存储路径，获取公共 URL
             const { data } = supabase.storage
-              .from('avatars')
+              .from("avatars")
               .getPublicUrl(profile.avatar_url);
             imageUrl = data?.publicUrl || null;
           }
@@ -88,7 +100,7 @@ export default function ChatProvider({ children }: PropsWithChildren) {
           image: imageUrl,
           user_details: {
             email: profile.email,
-            username: profile.username || profile.email.split('@')[0],
+            username: profile.username || profile.email.split("@")[0],
           },
         },
         client.devToken(profile.id)
@@ -99,7 +111,9 @@ export default function ChatProvider({ children }: PropsWithChildren) {
       setError(null);
     } catch (err) {
       console.error("ChatProvider: Error connecting user", err);
-      setError(err instanceof Error ? err.message : "Failed to connect to chat");
+      setError(
+        err instanceof Error ? err.message : "Failed to connect to chat"
+      );
       setIsConnected(false);
     }
   };
@@ -137,11 +151,11 @@ export default function ChatProvider({ children }: PropsWithChildren) {
 
   // 提供 ChatContext 和 Stream Chat 组件
   return (
-    <ChatContext.Provider value={{ client, isConnected, reconnect: connectUser }}>
+    <ChatContext.Provider
+      value={{ client, isConnected, reconnect: connectUser }}
+    >
       <OverlayProvider>
-        <Chat client={client}>
-          {isReady ? children : null}
-        </Chat>
+        <Chat client={client}>{isReady ? children : null}</Chat>
       </OverlayProvider>
     </ChatContext.Provider>
   );

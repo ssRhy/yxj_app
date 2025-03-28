@@ -1,63 +1,11 @@
 import React, { useEffect } from "react";
-import {
-  View,
-  Text,
-  ImageBackground,
-  SafeAreaView,
-  StyleSheet,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
-import CustomButton from "../assets/components/CustomButton";
-import BgGradient from "../assets/components/BgGradient";
-import AuthInitializer from "../components/auth/AuthInitializer";
-import { useUser } from "../context/UserContext";
+import { StyleSheet } from "react-native";
 
+import { router, Redirect } from "expo-router";
 
-
-export default function App() {
-  const { user } = useUser();
-
-  // If user is already logged in, redirect to dashboard
-  useEffect(() => {
-    if (user) {
-      router.replace("/(routes)/dashboard");
-    }
-  }, [user]);
-
-  return (
-    <View style={styles.container}>
-      {/* AuthInitializer will check for saved credentials and redirect if needed */}
-      <AuthInitializer />
-      
-      <ImageBackground
-        source={require("../assets/background.png")}
-        style={styles.background}
-        resizeMode="cover"
-        onError={(e) =>
-          console.error("Image loading error:", e.nativeEvent.error)
-        }
-      >
-        <BgGradient
-          colors={["rgba(29, 3, 51, 0.4)", "rgba(174, 149, 65, 0.8)"]}
-        >
-          <SafeAreaView style={styles.safeArea}>
-            <View>
-              <Text style={styles.welcomeText}>Welcome to the good </Text>
-              <Text style={styles.titleText}>Personal App</Text>
-            </View>
-
-            <View style={styles.buttonContainer}>
-              <CustomButton
-                title="Start"
-                onPress={() => router.push("/(routes)/register")}
-              />
-            </View>
-          </SafeAreaView>
-        </BgGradient>
-      </ImageBackground>
-    </View>
-  );
+export default function HomeScreen() {
+  // 直接重定向到仪表盘页面，不要求登录
+  return <Redirect href="/dashboard" />;
 }
 
 const styles = StyleSheet.create({

@@ -43,7 +43,7 @@ export default function DashboardLayout() {
           ),
         }}
       />
-       <Tabs.Screen
+      <Tabs.Screen
         name="Learn-library"
         options={{
           title: "玄学智库",
@@ -61,8 +61,6 @@ export default function DashboardLayout() {
           ),
         }}
       />
-      
     </Tabs>
-    // Add more screens here as needed
   );
 }

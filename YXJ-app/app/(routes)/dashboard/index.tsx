@@ -1,493 +1,771 @@
-import React, { useState, useEffect } from 'react';
-import type { FunctionComponent } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  ImageBackground,
-  ViewStyle,
-  TextStyle,
-  TouchableOpacityProps,
+  ScrollView,
+  TextInput,
+  Modal,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "../../../context/UserContext";
+import { useRouter } from "expo-router";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-// 定义健康数据类型
-interface HealthData {
-  bmi: number;
-  bmiStatus: string;
-  healthScore: number;
-  bmr: number;
-  dailyCalories: number;
-}
+const ProfilePage = () => {
+  const { user, isLoading, updateUser } = useUser();
+  const router = useRouter();
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editField, setEditField] = useState("");
+  const [editValue, setEditValue] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-// MBTI描述函数
-function getMBTIDescription(mbtiType: string): string {
-  const descriptions: Record<string, string> = {
-    INTJ: "建筑师型人格 - 富有想象力和战略性的思考者",
-    INTP: "逻辑学家型人格 - 创新的发明家",
-    ENTJ: "指挥官型人格 - 大胆且具有想象力的领导者",
-    ENTP: "辩论家型人格 - 聪明好奇的思考者",
-    // ... 可以添加更多MBTI类型描述
-  };
-  return descriptions[mbtiType] || "暂无描述信息";
-};
+  // 添加MBTI选项列表
+  const mbtiOptions = [
+    "INTJ",
+    "INTP",
+    "ENTJ",
+    "ENTP",
+    "INFJ",
+    "INFP",
+    "ENFJ",
+    "ENFP",
+    "ISTJ",
+    "ISFJ",
+    "ESTJ",
+    "ESFJ",
+    "ISTP",
+    "ISFP",
+    "ESTP",
+    "ESFP",
+  ];
 
-// 简单的星座描述
-function getZodiacDescription(zodiac: string): string {
-  const descriptions: Record<string, string> = {
-    白羊座: "充满活力、直率、勇敢，是十二星座中最具冒险精神的星座。",
-    金牛座: "务实、可靠、耐心，喜欢稳定和安全感，对物质享受有很高的追求。",
-    双子座: "聪明、好奇、适应力强，善于沟通和表达，但有时可能显得优柔寡断。",
-    巨蟹座: "敏感、情感丰富、有保护欲，非常重视家庭和亲密关系。",
-    狮子座: "自信、慷慨、有领导力，喜欢成为关注的焦点，有强烈的自尊心。",
-    处女座: "细致、分析能力强、完美主义，注重细节和效率，但有时过于挑剔。",
-    天秤座: "和谐、公正、社交能力强，追求平衡与美感，但有时难以做决定。",
-    天蝎座: "热情、坚定、神秘，情感深沉且忠诚，但有时过于敏感和固执。",
-    射手座: "乐观、自由、哲学思想，喜欢冒险和探索，但有时缺乏耐心。",
-    摩羯座: "务实、有抱负、自律，目标明确且有责任感，但有时过于严肃。",
-    水瓶座: "独立、创新、人道主义，思想前卫且重视自由，但有时显得疏离。",
-    双鱼座: "富有同情心、直觉敏锐、浪漫，有艺术天赋，但有时过于理想化。",
-  };
-
-  return descriptions[zodiac] || "暂无描述信息";
-};
-
-// 自定义按钮组件
-interface CustomButtonProps extends TouchableOpacityProps {
-  title: string;
-  onPress: () => void;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
-}
-
-const CustomButton: FunctionComponent<CustomButtonProps> = ({
-  title,
-  onPress,
-  style,
-  textStyle,
-  ...props
-}) => {
-  return (
-    <TouchableOpacity
-      style={[styles.button, style]}
-      onPress={onPress}
-      activeOpacity={0.7}
-      {...props}
-    >
-      <Text style={[styles.buttonText, textStyle]}>{title}</Text>
-    </TouchableOpacity>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  gradient: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-    padding: 16,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1a1a1a",
-  },
-  loadingText: {
-    color: "white",
-    marginTop: 16,
-    fontSize: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1a1a1a",
-    padding: 20,
-  },
-  errorText: {
-    color: "white",
-    fontSize: 18,
-    marginBottom: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
-  },
-  logoutButton: {
-    padding: 8,
-  },
-  logoutText: {
-    color: "#fded13",
-    fontSize: 16,
-  },
-  profileCard: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  profileHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  avatarContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "rgba(253, 237, 19, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  avatarText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileName: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 4,
-  },
-  profileEmail: {
-    fontSize: 14,
-    color: "rgba(255, 255, 255, 0.7)",
-  },
-  card: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 16,
-  },
-  infoRow: {
-    flexDirection: "row",
-    marginBottom: 12,
-  },
-  infoLabel: {
-    width: 80,
-    fontSize: 16,
-    color: "rgba(255, 255, 255, 0.7)",
-  },
-  infoValue: {
-    flex: 1,
-    fontSize: 16,
-    color: "white",
-  },
-  editButton: {
-    backgroundColor: "rgba(253, 237, 19, 0.2)",
-    padding: 10,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 16,
-  },
-  editButtonText: {
-    color: "#fded13",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  dataRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  dataItem: {
-    flex: 1,
-    alignItems: "center",
-    padding: 12,
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
-    borderRadius: 8,
-    marginHorizontal: 4,
-  },
-  dataValue: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fded13",
-  },
-  dataLabel: {
-    fontSize: 14,
-    color: "white",
-    marginTop: 4,
-  },
-  dataStatus: {
-    fontSize: 12,
-    color: "rgba(255, 255, 255, 0.7)",
-    marginTop: 4,
-  },
-  dataUnit: {
-    fontSize: 12,
-    color: "rgba(255, 255, 255, 0.7)",
-    marginTop: 2,
-  },
-  tipText: {
-    fontSize: 16,
-    color: "white",
-    lineHeight: 24,
-    marginBottom: 12,
-  },
-  mbtiDescription: {
-    fontSize: 16,
-    color: "white",
-    lineHeight: 24,
-  },
-  zodiacDescription: {
-    fontSize: 16,
-    color: "white",
-    lineHeight: 24,
-  },
-  background: {
-    flex: 1,
-  },
-  button: {
-    backgroundColor: "rgba(253, 237, 19, 0.2)",
-    padding: 10,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fded13",
-    fontSize: 16,
-    fontWeight: "500",
-  },
-});
-
-// 仪表盘页面组件
-const DashboardPage: FunctionComponent = () => {
-  const [healthData, setHealthData] = useState<HealthData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { user, logout } = useUser();
-
-  useEffect(() => {
-    if (user) {
-      calculateHealthData(user);
-    }
-    setLoading(false);
-  }, [user]);
-
-  function calculateHealthData(user: any) {
-    if (user.height && user.weight) {
-      const height = user.height / 100; // 转换为米
-      const bmi = user.weight / (height * height);
-      const bmiStatus = getBMIStatus(bmi);
-      const healthScore = calculateHealthScore(bmi);
-      const bmr = calculateBMR(user);
-      const dailyCalories = bmr * 1.2; // 假设轻度活动水平
-
-      setHealthData({
-        bmi,
-        bmiStatus,
-        healthScore,
-        bmr,
-        dailyCalories,
-      });
-    }
-  };
-
-  function getBMIStatus(bmi: number): string {
-    if (bmi < 18.5) return "偏瘦";
-    if (bmi < 24) return "正常";
-    if (bmi < 28) return "偏重";
-    return "肥胖";
-  };
-
-  function calculateHealthScore(bmi: number): number {
-    if (bmi >= 18.5 && bmi < 24) return 100;
-    if (bmi < 18.5) return 100 - (18.5 - bmi) * 10;
-    return 100 - (bmi - 24) * 5;
-  };
-
-  function calculateBMR(user: any): number {
-    if (!user.weight || !user.height) return 0;
-    // 使用Harris-Benedict公式
-    const base = user.gender === "male" ? 88.362 : 447.593;
-    const weightFactor = user.gender === "male" ? 13.397 : 9.247;
-    const heightFactor = user.gender === "male" ? 4.799 : 3.098;
-    const ageFactor = user.gender === "male" ? 5.677 : 4.33;
-
-    // 假设年龄为25岁，如果没有出生日期
-    const age = user.birthDate
-      ? new Date().getFullYear() - new Date(user.birthDate).getFullYear()
-      : 25;
-
+  if (isLoading) {
     return (
-      base +
-      weightFactor * user.weight +
-      heightFactor * user.height -
-      ageFactor * age
-    );
-  };
-
-  function handleLogout() {
-    logout().then(() => router.replace("/(routes)/login"));
-  };
-
-  function handleEditProfile() {
-    router.push("/(routes)/profile/edit");
-  };
-
-  function formatDate(dateString: string): string {
-    if (!dateString) return "未设置";
-    const date = new Date(dateString);
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#fded13" />
-        <Text style={styles.loadingText}>加载中...</Text>
-      </View>
+      <LinearGradient
+        colors={["#0a0531", "#3F16D3", "#24243e"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
+      >
+        <SafeAreaView style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#7b59ff" />
+          <Text style={styles.loadingText}>加载个人信息中...</Text>
+        </SafeAreaView>
+      </LinearGradient>
     );
   }
 
   if (!user) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>未登录，请先登录</Text>
-        <CustomButton
-          title="去登录"
-          onPress={() => router.replace("/(routes)/login")}
-        />
-      </View>
+      <LinearGradient
+        colors={["#0a0531", "#3F16D3", "#24243e"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.gradient}
+      >
+        <SafeAreaView style={styles.errorContainer}>
+          <View style={styles.errorCard}>
+            <Ionicons name="alert-circle-outline" size={50} color="#ff6b8b" />
+            <Text style={styles.errorText}>请先登录查看您的个人信息</Text>
+            <TouchableOpacity style={styles.loginButton}>
+              <Text style={styles.loginButtonText}>前往登录</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
     );
   }
 
+  const navigateToEnergyProfile = () => {
+    router.push("/dashboard/energy-profile");
+  };
+
+  // 打开编辑模态窗口的函数
+  const openEditModal = (field, currentValue) => {
+    setEditField(field);
+    setEditValue(currentValue || "");
+    setEditModalVisible(true);
+  };
+
+  // 保存编辑的函数
+  const saveEdit = () => {
+    if (editField && user) {
+      const updatedUser = { ...user };
+
+      switch (editField) {
+        case "username":
+          updatedUser.username = editValue;
+          break;
+        case "gender":
+          updatedUser.gender = editValue;
+          break;
+        case "birthDate":
+          updatedUser.birthDate = editValue;
+          break;
+        case "mbti":
+          updatedUser.mbti = editValue;
+          break;
+      }
+
+      updateUser(updatedUser);
+    }
+
+    setEditModalVisible(false);
+  };
+
+  // 处理日期变更
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      const formattedDate = selectedDate.toISOString().split("T")[0]; // 格式化为 YYYY-MM-DD
+      setEditValue(formattedDate);
+    }
+  };
+
+  // 渲染编辑模态窗口内容
+  const renderEditModalContent = () => {
+    switch (editField) {
+      case "username":
+        return (
+          <TextInput
+            style={styles.modalInput}
+            value={editValue}
+            onChangeText={setEditValue}
+            placeholder="输入用户名"
+            placeholderTextColor="rgba(255, 255, 255, 0.5)"
+          />
+        );
+
+      case "gender":
+        return (
+          <View style={styles.optionsContainer}>
+            <TouchableOpacity
+              style={[
+                styles.optionButton,
+                editValue === "男" && styles.selectedOption,
+              ]}
+              onPress={() => setEditValue("男")}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  editValue === "男" && styles.selectedOptionText,
+                ]}
+              >
+                男
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.optionButton,
+                editValue === "女" && styles.selectedOption,
+              ]}
+              onPress={() => setEditValue("女")}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  editValue === "女" && styles.selectedOptionText,
+                ]}
+              >
+                女
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.optionButton,
+                editValue === "其他" && styles.selectedOption,
+              ]}
+              onPress={() => setEditValue("其他")}
+            >
+              <Text
+                style={[
+                  styles.optionText,
+                  editValue === "其他" && styles.selectedOptionText,
+                ]}
+              >
+                其他
+              </Text>
+            </TouchableOpacity>
+          </View>
+        );
+
+      case "birthDate":
+        return (
+          <View>
+            <Text style={styles.dateInputLabel}>
+              请输入出生日期（格式：YYYY-MM-DD）
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              value={editValue}
+              onChangeText={setEditValue}
+              placeholder="例如：1990-01-01"
+              placeholderTextColor="rgba(255, 255, 255, 0.5)"
+              keyboardType="numbers-and-punctuation"
+            />
+            <Text style={styles.dateInputHint}>日期格式：年份-月份-日期</Text>
+          </View>
+        );
+
+      case "mbti":
+        return (
+          <ScrollView style={styles.mbtiContainer}>
+            <View style={styles.mbtiOptionsGrid}>
+              {mbtiOptions.map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.mbtiOption,
+                    editValue === option && styles.selectedMbtiOption,
+                  ]}
+                  onPress={() => setEditValue(option)}
+                >
+                  <Text
+                    style={[
+                      styles.mbtiOptionText,
+                      editValue === option && styles.selectedMbtiOptionText,
+                    ]}
+                  >
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        style={styles.gradient}
-        colors={["rgba(90, 82, 97, 0.4)", "rgba(133, 12, 199, 0.8)"]}
-      >
-        <ImageBackground
-          source={require("../../../assets/background.png")}
-          style={styles.background}
-          resizeMode="cover"
+    <LinearGradient
+      colors={["#0a0531", "#3F16D3", "#24243e"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.gradient}
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}>
+          <Text style={styles.title}>个人信息</Text>
+          <TouchableOpacity style={styles.settingsButton}>
+            <Ionicons name="settings-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={styles.scrollView}>
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>基本资料</Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.infoRow}
+              onPress={() => openEditModal("username", user.username)}
+            >
+              <View style={styles.infoLabel}>
+                <Ionicons name="person-outline" size={20} color="#7b59ff" />
+                <Text style={styles.labelText}>用户名</Text>
+              </View>
+              <View style={styles.infoValueContainer}>
+                <Text style={styles.infoValue}>
+                  {user.username || "未设置"}
+                </Text>
+                <Ionicons name="create-outline" size={16} color="#a0a0ff" />
+              </View>
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity
+              style={styles.infoRow}
+              onPress={() => openEditModal("gender", user.gender)}
+            >
+              <View style={styles.infoLabel}>
+                <Ionicons
+                  name="male-female-outline"
+                  size={20}
+                  color="#ff6d93"
+                />
+                <Text style={styles.labelText}>性别</Text>
+              </View>
+              <View style={styles.infoValueContainer}>
+                <Text style={styles.infoValue}>{user.gender || "未设置"}</Text>
+                <Ionicons name="create-outline" size={16} color="#a0a0ff" />
+              </View>
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity
+              style={styles.infoRow}
+              onPress={() => openEditModal("birthDate", user.birthDate)}
+            >
+              <View style={styles.infoLabel}>
+                <Ionicons name="calendar-outline" size={20} color="#54d6ba" />
+                <Text style={styles.labelText}>出生日期</Text>
+              </View>
+              <View style={styles.infoValueContainer}>
+                <Text style={styles.infoValue}>
+                  {user.birthDate || "未设置"}
+                </Text>
+                <Ionicons name="create-outline" size={16} color="#a0a0ff" />
+              </View>
+            </TouchableOpacity>
+
+            <View style={styles.divider} />
+
+            <TouchableOpacity
+              style={styles.infoRow}
+              onPress={() => openEditModal("mbti", user.mbti)}
+            >
+              <View style={styles.infoLabel}>
+                <Ionicons name="people-outline" size={20} color="#fded13" />
+                <Text style={styles.labelText}>MBTI类型</Text>
+              </View>
+              <View style={styles.infoValueContainer}>
+                <Text style={styles.infoValue}>{user.mbti || "未设置"}</Text>
+                <Ionicons name="create-outline" size={16} color="#a0a0ff" />
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={styles.energyProfileCard}
+            onPress={navigateToEnergyProfile}
+          >
+            <View style={styles.energyProfileContent}>
+              <View>
+                <Text style={styles.energyProfileTitle}>我的能量档案</Text>
+                <Text style={styles.energyProfileSubtitle}>
+                  查看完整的八字、紫微斗数与MBTI分析
+                </Text>
+              </View>
+              <View style={styles.energyProfileIcon}>
+                <Ionicons name="pulse" size={32} color="#7b59ff" />
+              </View>
+            </View>
+            <View style={styles.energyProfileFooter}>
+              <View style={styles.energyBadge}>
+                <Ionicons name="star-outline" size={16} color="#fded13" />
+                <Text style={styles.energyBadgeText}>命理能量解析</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="white" />
+            </View>
+          </TouchableOpacity>
+        </ScrollView>
+
+        {/* 编辑模态窗口 */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={editModalVisible}
+          onRequestClose={() => setEditModalVisible(false)}
         >
-          <SafeAreaView style={styles.safeArea}>
-            <ScrollView style={styles.scrollView}>
-              <View style={styles.header}>
-                <Text style={styles.welcomeText}>
-                  欢迎回来，{user.username}
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>
+                  {editField === "username"
+                    ? "编辑用户名"
+                    : editField === "gender"
+                    ? "选择性别"
+                    : editField === "birthDate"
+                    ? "设置出生日期"
+                    : "选择MBTI类型"}
                 </Text>
                 <TouchableOpacity
-                  style={styles.logoutButton}
-                  onPress={handleLogout}
+                  style={styles.modalCloseButton}
+                  onPress={() => setEditModalVisible(false)}
                 >
-                  <Text style={styles.logoutText}>退出登录</Text>
+                  <Ionicons name="close" size={24} color="white" />
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.profileCard}>
-                <View style={styles.profileHeader}>
-                  <View style={styles.avatarContainer}>
-                    <Text style={styles.avatarText}>
-                      {user.username.charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
-                  <View style={styles.profileInfo}>
-                    <Text style={styles.profileName}>{user.username}</Text>
-                    <Text style={styles.profileEmail}>{user.email}</Text>
-                  </View>
-                </View>
+              <View style={styles.modalContent}>
+                {renderEditModalContent()}
+              </View>
+
+              <View style={styles.modalFooter}>
                 <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={handleEditProfile}
+                  style={styles.modalCancelButton}
+                  onPress={() => setEditModalVisible(false)}
                 >
-                  <Text style={styles.editButtonText}>编辑资料</Text>
+                  <Text style={styles.modalCancelButtonText}>取消</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.modalSaveButton}
+                  onPress={saveEdit}
+                >
+                  <Text style={styles.modalSaveButtonText}>保存</Text>
                 </TouchableOpacity>
               </View>
-
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>个人信息</Text>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>性别:</Text>
-                  <Text style={styles.infoValue}>
-                    {user.gender
-                      ? user.gender === "male"
-                        ? "男"
-                        : user.gender === "female"
-                        ? "女"
-                        : "其他"
-                      : "未设置"}
-                  </Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>出生日期:</Text>
-                  <Text style={styles.infoValue}>
-                    {user.birthDate ? formatDate(user.birthDate) : "未设置"}
-                  </Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>星座:</Text>
-                  <Text style={styles.infoValue}>
-                    {user.zodiacSign || "未设置"}
-                  </Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>MBTI:</Text>
-                  <Text style={styles.infoValue}>{user.mbti || "未设置"}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>八字:</Text>
-                  <Text style={styles.infoValue}>
-                    {user.chineseBaZi || "未设置"}
-                  </Text>
-                </View>
-              </View>
-
-              {user.mbti && (
-                <View style={styles.card}>
-                  <Text style={styles.cardTitle}>MBTI 人格分析</Text>
-                  <Text style={styles.mbtiDescription}>
-                    {getMBTIDescription(user.mbti)}
-                  </Text>
-                </View>
-              )}
-
-              {user.zodiacSign && (
-                <View style={styles.card}>
-                  <Text style={styles.cardTitle}>星座特质</Text>
-                  <Text style={styles.zodiacDescription}>
-                    {getZodiacDescription(user.zodiacSign)}
-                  </Text>
-                </View>
-              )}
-            </ScrollView>
-          </SafeAreaView>
-        </ImageBackground>
-      </LinearGradient>
-    </View>
+            </View>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
-export default DashboardPage;
+const styles = StyleSheet.create({
+  gradient: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+    paddingTop: 10,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    marginVertical: 16,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "white",
+    textShadowColor: "rgba(123, 89, 255, 0.5)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 10,
+  },
+  settingsButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollView: {
+    paddingHorizontal: 16,
+  },
+  card: {
+    backgroundColor: "rgba(30, 30, 60, 0.7)",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(123, 89, 255, 0.3)",
+    shadowColor: "#6e45e2",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "white",
+  },
+  editButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(123, 89, 255, 0.2)",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  editText: {
+    color: "#a0a0ff",
+    marginLeft: 4,
+    fontSize: 14,
+  },
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  infoLabel: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  labelText: {
+    fontSize: 16,
+    color: "rgba(255, 255, 255, 0.7)",
+    marginLeft: 10,
+  },
+  infoValueContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  infoValue: {
+    fontSize: 16,
+    color: "white",
+    fontWeight: "500",
+    marginRight: 10,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  energyProfileCard: {
+    backgroundColor: "rgba(123, 89, 255, 0.2)",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(123, 89, 255, 0.5)",
+    shadowColor: "#6e45e2",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  energyProfileContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  energyProfileTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "white",
+    marginBottom: 4,
+  },
+  energyProfileSubtitle: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.7)",
+    maxWidth: "80%",
+  },
+  energyProfileIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  energyProfileFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  energyBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(30, 30, 60, 0.7)",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+  },
+  energyBadgeText: {
+    color: "#fded13",
+    marginLeft: 6,
+    fontSize: 14,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "white",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorCard: {
+    backgroundColor: "rgba(30, 30, 60, 0.7)",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    width: "90%",
+    borderWidth: 1,
+    borderColor: "rgba(123, 89, 255, 0.3)",
+    shadowColor: "#6e45e2",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#ff6b8b",
+    textAlign: "center",
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  loginButton: {
+    backgroundColor: "rgba(123, 89, 255, 0.3)",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: "#7b59ff",
+  },
+  loginButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "90%",
+    backgroundColor: "rgba(30, 30, 60, 0.95)",
+    borderRadius: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(123, 89, 255, 0.3)",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "white",
+  },
+  modalCloseButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    padding: 16,
+    minHeight: 120,
+  },
+  modalInput: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 8,
+    padding: 12,
+    color: "white",
+    fontSize: 16,
+  },
+  modalFooter: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
+  },
+  modalCancelButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginRight: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  modalCancelButtonText: {
+    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: 16,
+  },
+  modalSaveButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: "rgba(123, 89, 255, 0.6)",
+  },
+  modalSaveButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  optionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  optionButton: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 12,
+    marginHorizontal: 6,
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  selectedOption: {
+    backgroundColor: "rgba(123, 89, 255, 0.4)",
+    borderWidth: 1,
+    borderColor: "#7b59ff",
+  },
+  optionText: {
+    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: 16,
+  },
+  selectedOptionText: {
+    color: "white",
+    fontWeight: "500",
+  },
+  dateInputLabel: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.7)",
+    marginBottom: 8,
+  },
+  dateInputHint: {
+    fontSize: 12,
+    color: "rgba(255, 255, 255, 0.5)",
+    marginTop: 8,
+    fontStyle: "italic",
+  },
+  mbtiContainer: {
+    maxHeight: 200,
+  },
+  mbtiOptionsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  mbtiOption: {
+    width: "23%",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    margin: 3,
+    borderRadius: 8,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  selectedMbtiOption: {
+    backgroundColor: "rgba(123, 89, 255, 0.4)",
+    borderWidth: 1,
+    borderColor: "#7b59ff",
+  },
+  mbtiOptionText: {
+    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: 14,
+  },
+  selectedMbtiOptionText: {
+    color: "white",
+    fontWeight: "500",
+  },
+});
+
+export default ProfilePage;

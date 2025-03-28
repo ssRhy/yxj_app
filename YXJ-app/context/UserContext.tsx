@@ -21,6 +21,8 @@ export interface UserInfo {
   chineseBaZi?: string; // 八字
   createdAt?: string;
   updatedAt?: string;
+  height?: number;
+  weight?: number;
 }
 
 // 上下文接口
@@ -28,8 +30,6 @@ interface UserContextType {
   user: UserInfo | null;
   isLoading: boolean;
   error: string | null;
-  login: (userData: UserInfo) => Promise<void>;
-  logout: () => Promise<void>;
   updateUser: (userData: Partial<UserInfo>) => Promise<void>;
 }
 
@@ -39,75 +39,26 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 // 存储键
 const USER_STORAGE_KEY = "user_info";
 
+// 默认用户数据
+const defaultUser: UserInfo = {
+  id: "default-user-id",
+  username: "默认用户",
+  email: "user@example.com",
+  gender: "male",
+  birthDate: "2000-01-01",
+  zodiacSign: "水瓶座",
+  mbti: "INTJ",
+  height: 175,
+  weight: 70,
+};
+
 // 提供者组件
 export const UserProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<UserInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<UserInfo | null>(defaultUser); // 默认已设置用户
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // 初始化 - 从存储中加载用户数据
-  useEffect(() => {
-    const loadUserFromStorage = async () => {
-      try {
-        const userJson = await AsyncStorage.getItem(USER_STORAGE_KEY);
-        if (userJson) {
-          setUser(JSON.parse(userJson));
-        }
-      } catch (err) {
-        setError("Failed to load user data");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadUserFromStorage();
-  }, []);
-
-  // 登录 - 保存用户数据
-  const login = async (userData: UserInfo) => {
-    try {
-      setIsLoading(true);
-      // 添加创建时间和ID
-      const enhancedUserData = {
-        ...userData,
-        id: userData.id || `user_${Date.now()}`,
-        createdAt: userData.createdAt || new Date().toISOString(),
-      };
-
-      // 保存到状态
-      setUser(enhancedUserData);
-
-      // 保存到存储
-      await AsyncStorage.setItem(
-        USER_STORAGE_KEY,
-        JSON.stringify(enhancedUserData)
-      );
-      setError(null);
-    } catch (err) {
-      setError("Failed to save user data");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // 登出 - 清除用户数据
-  const logout = async () => {
-    try {
-      setIsLoading(true);
-      await AsyncStorage.removeItem(USER_STORAGE_KEY);
-      setUser(null);
-      setError(null);
-    } catch (err) {
-      setError("Failed to remove user data");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // 更新用户信息
   const updateUser = async (userData: Partial<UserInfo>) => {
@@ -131,9 +82,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   return (
-    <UserContext.Provider
-      value={{ user, isLoading, error, login, logout, updateUser }}
-    >
+    <UserContext.Provider value={{ user, isLoading, error, updateUser }}>
       {children}
     </UserContext.Provider>
   );

@@ -4,9 +4,9 @@ import {
   useContext,
   useEffect,
   useState,
-} from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '../../../../lib/supabase';
+} from "react";
+import { Session, User } from "@supabase/supabase-js";
+import { supabase } from "../../../../lib/supabase";
 
 type AuthContext = {
   session: Session | null;
@@ -42,23 +42,25 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 
     const fetchProfile = async () => {
       let { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
         .single();
-      
+
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error("Error fetching profile:", error);
         return;
       }
-      
+
       setProfile(data);
     };
     fetchProfile();
   }, [session?.user]);
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user || null, profile }}>
+    <AuthContext.Provider
+      value={{ session, user: session?.user || null, profile }}
+    >
       {children}
     </AuthContext.Provider>
   );
